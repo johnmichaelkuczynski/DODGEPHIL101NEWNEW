@@ -1,0 +1,84 @@
+OVERRIDE. FINAL EXAM: ONE-CLICK GENERATION, NO INTERMEDIATE SCREEN. LLM-DRIVEN.
+
+Do not mark this complete until every acceptance check passes.
+
+0) Stop doing these things
+No interstitial “Generating…” page, modal, or second button.
+
+No alerts/popups.
+
+No question bank or hardcoded items.
+
+No dependency on any other screen. This is a standalone Final Exam function.
+
+1) UX contract (must match exactly)
+Page shows a single, primary button: “Generate Final Exam.”
+
+User clicks once → button disables and shows inline “Generating exam…” text → exam appears on the same page.
+
+If generation fails, an inline error row appears on this page with the real reason (provider/timeout/etc.) and the button re-enables.
+
+There is never a second “generate” button, a modal, or a separate step.
+
+2) Click handling (no double triggers)
+Ensure the button is not inside a form. If it is, it must not submit anything.
+
+Ensure there is exactly one on-click handler. Remove all others.
+
+Ensure no overlay or container blocks clicks (no invisible sheets, no pointer-events blockers).
+
+Ensure the button cannot be clicked twice while the request is in flight.
+
+3) LLM generation behavior
+On click, make one request to generate the entire exam from the Final Exam Study Guide objectives (Weeks 1–6) text embedded in this function.
+
+LLM must return: 20 MC (with correct option), 10 short answers (with model answers), 5 essay prompts. Even coverage across weeks.
+
+The returned set is frozen for the attempt and stored so grading uses exactly what was shown.
+
+4) Grading behavior
+MC: graded locally against the key that came back from the LLM for this attempt.
+
+Short answer & essay: send the student response with the prompt to the LLM for a deterministic judgment:
+
+SA → “Correct/Incorrect + one-sentence rationale (strict on concept, flexible on wording).”
+
+Essay → “0–10 with a 0–4/0–4/0–2 rubric + 2–3 sentence feedback.”
+
+5) Error handling (no popups, no lies)
+Timeouts must be ≥120 seconds.
+
+If the provider returns 429/503, retry once after a short backoff.
+
+On failure, show the actual error inline on the page and re-enable the button.
+
+Do not claim success unless the exam actually renders.
+
+6) Persistence
+The generated exam for an attempt is stored and reused on refresh until the user submits or explicitly discards the attempt.
+
+A separate “Generate New Exam” control is visible only after completion or discard.
+
+7) Verification you must perform (and document)
+Open the Final Exam page. Confirm there is only one visible CTA: “Generate Final Exam.”
+
+Click it once. Confirm:
+
+The button disables and shows “Generating exam…”.
+
+No modal appears, no second button appears, no alert pops up.
+
+Within the timeout, the exam content (MC, SA, Essay) renders on this same page.
+
+Intentionally break the provider key (temporarily) and confirm an inline error message appears (no popup), button re-enables. Restore key afterwards.
+
+Refresh the page mid-attempt: the same exam set appears (no regeneration).
+
+Complete the attempt and see scores (MC auto, SA/Essay LLM with rationale/feedback).
+
+Now a “Generate New Exam” control is visible. Clicking it produces a new, different exam.
+
+8) Deliverables (evidence)
+Short screen recording showing: one click → inline loader → exam appears; then a failure case showing inline error; then refresh preserving the attempt; then completion and “Generate New Exam.”
+
+One sentence confirming there is no interstitial component, no second button, and no alert anywhere in the flow.

@@ -1,0 +1,90 @@
+1) Tighten the tutor prompt (answer-first, topic-locked, no canned pivots)
+In /api/tutor-chat, replace your tutorPrompt with this:
+
+ts
+Copy
+Edit
+const tutorPrompt = `ROLE: You are a SYMBOLIC LOGIC tutor.
+
+NON-NEGOTIABLE RULES (enforced):
+- ANSWER FIRST: Give a direct, concise answer to the exact question asked.
+- TOPIC LOCK: Stay strictly on symbolic logic. Do NOT pivot to free will, ethics, Frankfurt, etc., unless the student asks.
+- GROUNDING: Refer explicitly to a phrase from the student's latest message in quotes, e.g., ["if...then"] so the follow-up is clearly anchored.
+- FOLLOW-UP: Exactly ONE short follow-up that deepens *this* logic topic (example, counterexample, or tiny practice), only if helpful.
+- NO BOILERPLATE: Never ask vague coaching questions like “How does this relate to free will?” or “What do you think?” unless the student asked for that style.
+- STYLE: Plain text. Use ∧ ∨ ¬ → ↔ ∀ ∃ when needed. Be concrete.
+
+CONVERSATION HISTORY (recent):
+${historyText}
+
+STUDENT QUESTION (topic=Symbolic Logic):
+${message}
+RECENT PERFORMANCE (for difficulty tuning only): ${avgPerformance.toFixed(0)}%${documentContextText}
+
+Return ONLY valid JSON (no extra prose):
+{
+  "content": "Direct answer to the exact logic question (concise, concrete, uses proper symbols if needed).",
+  "followUp": "One targeted follow-up that clearly cites a phrase from the student's question in quotes and stays on the same logic topic.",
+  "hasQuestion": true/false,
+  "questionText": "A single tiny on-topic practice item (optional). Keep it strictly about what they just asked.",
+  "questionType": "multiple_choice" | "text_input",
+  "questionOptions": ["A","B","C","D"], 
+  "correctAnswer": 0
+}`;
+Key changes:
+
+Answer-first requirement.
+
+Topic lock to symbolic logic.
+
+Ban generic pivots (free will, etc.).
+
+Grounding: follow-up must quote a phrase from the user’s last message.
+
+Quiz becomes optional and must be on-topic & tiny.
+
+2) Add a tiny server-side guard to block off-topic/canned follow-ups
+Right after you parse parsedResponse, before res.json(...), insert this:
+
+ts
+Copy
+Edit
+// Guard: keep follow-up on-topic and grounded in the user's message
+const userMsg = String(message).toLowerCase();
+const offTopicTriggers = ["free will", "frankfurt", "ethics", "bullshit", "moral", "responsibility", "euthyphro", "problem of evil"];
+const looksOffTopic = (txt: string) => offTopicTriggers.some(k => txt.toLowerCase().includes(k)) && !userMsg.includes(k);
+
+const quotesUser = (txt: string) => {
+  // must contain at least one quoted substring from the user's message tokens
+  const tokens = userMsg.match(/[a-z0-9¬∧∨→↔∀∃]+/gi)?.slice(0, 6) || [];
+  return tokens.some(t => t.length > 2 && txt.includes(`"${t}"`));
+};
+
+if (parsedResponse.followUp && looksOffTopic(parsedResponse.followUp)) {
+  parsedResponse.followUp = `Want a quick example using your phrase "${(message.match(/"([^"]+)"/)?.[1] || message.split(/\s+/)[0])}"?`;
+}
+
+if (parsedResponse.followUp && !quotesUser(parsedResponse.followUp)) {
+  const key = (message.match(/"([^"]+)"/)?.[1]) || (message.split(/\s+/).find(w => w.length > 2) || "your statement");
+  parsedResponse.followUp = `Based on "${key}", here’s a tiny step that stays on this: …`;
+}
+
+// Make quiz strictly optional and tiny; kill it if off-topic
+if (parsedResponse.hasQuestion && parsedResponse.questionText && looksOffTopic(parsedResponse.questionText)) {
+  parsedResponse.hasQuestion = false;
+  parsedResponse.questionText = undefined;
+  parsedResponse.questionOptions = undefined;
+  parsedResponse.correctAnswer = undefined;
+}
+What this does:
+
+Blocks common off-topic pivots (e.g., “free will”) unless the user actually asked about them.
+
+Enforces grounding: follow-up must quote a phrase from the user’s own message.
+
+Cancels any off-topic quiz.
+
+3) Nudge generation to be precise, not rambly
+Lower temperature in this route to reduce “creative” drift:
+
+Change each model call in this handler from temperature: 0.7 → temperature: 0.2.

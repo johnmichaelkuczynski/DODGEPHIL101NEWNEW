@@ -1,0 +1,132 @@
+[
+  {
+    "id": "F1",
+    "type": "mc",
+    "points": 2,
+    "prompt": "The Euthyphro Dilemma asks whether something is moral because God commands it, or:",
+    "choices": ["Because humans approve of it", "Because it is moral independently of God's commands", "Because it produces happiness", "Because it maximizes utility"],
+    "answer": "Because it is moral independently of God's commands"
+  },
+  {
+    "id": "F2",
+    "type": "mc",
+    "points": 2,
+    "prompt": "In the Problem of Evil, which of the following is not one of God's traditional attributes?",
+    "choices": ["Omnipotence", "Omniscience", "Omnibenevolence", "Omnipresence"],
+    "answer": "Omnipresence"
+  },
+  {
+    "id": "F3",
+    "type": "mc",
+    "points": 2,
+    "prompt": "Which type of moral luck involves differences in behavior due to circumstances beyond one's control?",
+    "choices": ["Resultant moral luck", "Constitutive moral luck", "Circumstantial moral luck", "Causal moral luck"],
+    "answer": "Circumstantial moral luck"
+  },
+  {
+    "id": "F4",
+    "type": "mc",
+    "points": 2,
+    "prompt": "In a Frankfurt-style case, moral responsibility is shown to be possible:",
+    "choices": ["Only if the agent has alternative possibilities", "Even if the agent lacks alternative possibilities", "Only if coercion is present", "Only if intentions are irrelevant"],
+    "answer": "Even if the agent lacks alternative possibilities"
+  },
+  {
+    "id": "F5",
+    "type": "mc",
+    "points": 2,
+    "prompt": "In the Ring of Gyges thought experiment, what is the main philosophical question?",
+    "choices": ["Can power corrupt absolutely?", "Would people act justly if they could avoid all consequences?", "Does invisibility cause moral responsibility to vanish?", "Is magic possible?"],
+    "answer": "Would people act justly if they could avoid all consequences?"
+  },
+  {
+    "id": "F6",
+    "type": "sa",
+    "points": 5,
+    "prompt": "Explain one horn of the Euthyphro Dilemma and its implications for divine command theory."
+  },
+  {
+    "id": "F7",
+    "type": "sa",
+    "points": 5,
+    "prompt": "Give an example of natural evil discussed in the course and explain why it is considered a challenge to theism."
+  },
+  {
+    "id": "F8",
+    "type": "sa",
+    "points": 5,
+    "prompt": "Define \"resultant moral luck\" and give an original example."
+  },
+  {
+    "id": "F9",
+    "type": "sa",
+    "points": 5,
+    "prompt": "In a Frankfurt-style case, what is a \"counterfactual intervener\"?"
+  },
+  {
+    "id": "F10",
+    "type": "sa",
+    "points": 5,
+    "prompt": "Explain one way the Ring of Gyges story supports Plato's view about justice and character."
+  },
+  {
+    "id": "F11",
+    "type": "essay",
+    "points": 10,
+    "prompt": "Present and defend a resolution to the Euthyphro Dilemma, addressing at least one objection."
+  },
+  {
+    "id": "F12",
+    "type": "essay",
+    "points": 10,
+    "prompt": "Describe an original case of moral luck and explain how it challenges control-based theories of responsibility."
+  },
+  {
+    "id": "F13",
+    "type": "essay",
+    "points": 10,
+    "prompt": "Construct an original Frankfurt-style case and explain why moral responsibility applies in your example."
+  },
+  {
+    "id": "F14",
+    "type": "essay",
+    "points": 10,
+    "prompt": "Analyze the Problem of Evil as it relates to natural disasters. Present at least one theistic response and evaluate it."
+  },
+  {
+    "id": "F15",
+    "type": "essay",
+    "points": 10,
+    "prompt": "Using the Gyges Ring scenario, discuss whether true justice can exist without external accountability."
+  },
+  {
+    "id": "F16",
+    "type": "sa",
+    "points": 5,
+    "prompt": "Explain how the Problem of Evil specifically challenges the existence of an omnipotent and omnibenevolent God."
+  },
+  {
+    "id": "F17",
+    "type": "sa",
+    "points": 5,
+    "prompt": "What is constitutive moral luck and how does it differ from circumstantial moral luck?"
+  },
+  {
+    "id": "F18",
+    "type": "sa",
+    "points": 5,
+    "prompt": "According to Frankfurt, what makes someone morally responsible even without alternative possibilities?"
+  },
+  {
+    "id": "F19",
+    "type": "sa",
+    "points": 5,
+    "prompt": "In the Ring of Gyges story, what does the shepherd's behavior suggest about human nature and morality?"
+  },
+  {
+    "id": "F20",
+    "type": "sa",
+    "points": 5,
+    "prompt": "Explain one way that moral luck challenges traditional notions of fairness in moral judgment."
+  }
+]

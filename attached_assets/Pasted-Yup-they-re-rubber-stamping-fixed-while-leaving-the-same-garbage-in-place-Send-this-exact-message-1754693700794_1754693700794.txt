@@ -1,0 +1,109 @@
+Yup—they’re rubber-stamping “fixed” while leaving the same garbage in place. Send this exact message to the Replit agent. It gives them zero wiggle room and a pass/fail checklist.
+
+Replace exams with text-based banks (no AI, no generics)
+Do this exactly. No substitutions. Provide diffs and screenshots.
+
+0) Locate the current junk
+Run in shell:
+
+vbnet
+Copy
+Edit
+rg -n "trolley|philosophy of mind|Every philosophical argument needs premises|Analyze the concept of justice" src app server shared
+Post the file paths that contain these strings. Those are the bad banks.
+
+1) Kill AI/placeholder generation
+Search for any “generate”/LLM code used for exams:
+
+vbnet
+Copy
+Edit
+rg -n "generate.*Exam|LLM|openai|anthropic|randomize.*exam|placeholder" src app server shared
+Remove/disable it and switch to static banks only.
+
+2) Create canonical banks (exact filenames)
+Create these two files and commit them:
+
+shared/exams/midterm_exam.json
+
+shared/exams/final_exam.json
+
+Paste the 20Q Midterm and 20Q Final I provided earlier word-for-word using this schema exactly:
+
+json
+Copy
+Edit
+[
+  {
+    "id": "M1",
+    "type": "mc",                          // mc | sa | essay
+    "points": 2,
+    "prompt": "Which branch of philosophy studies the nature of knowledge?",
+    "choices": ["Metaphysics","Epistemology","Ethics","Logic"],
+    "answer": "Epistemology"
+  },
+  {
+    "id": "M6",
+    "type": "sa",
+    "points": 5,
+    "prompt": "Name two key differences between epistemology and metaphysics as described in the course text."
+  },
+  {
+    "id": "M11",
+    "type": "essay",
+    "points": 10,
+    "prompt": "Summarize Plato’s Allegory of the Cave and explain its philosophical significance regarding the nature of reality and knowledge."
+  }
+  // …continue until 20 items for MIDTERM, then same for FINAL (20 items)
+]
+3) Wire the UI to these files only
+Find the loader for the Final and Midterm routes (likely something like src/server/routes/exams.ts or app/(course)/[week]/exam.tsx).
+
+Replace any previous source with a direct import:
+
+ts
+Copy
+Edit
+import finalExam from "@/shared/exams/final_exam.json";
+import midtermExam from "@/shared/exams/midterm_exam.json";
+Ensure the page uses finalExam/midtermExam as the sole question source. No fallbacks.
+
+4) Ensure 20 questions render and total 100 points
+If your UI expects 100 points, set points so the sum is 100. If it totals 90/110, adjust points, not content.
+
+5) Acceptance tests (must pass before “fixed”)
+Add tests/exams.spec.ts with:
+
+Asserts that final_exam.json.length === 20 and midterm_exam.json.length === 20.
+
+Asserts that sentinel prompts exist:
+
+Final includes: “Euthyphro”, “Problem of Evil”, “Frankfurt-style”, “Moral luck”, “Gyges”.
+
+Midterm includes: “Allegory of the Cave”, “Gettier”, “Skepticism”, “Dualism”, “Frankfurt (truth/lie/bullshit)”.
+Run:
+
+bash
+Copy
+Edit
+npm test -w || pnpm test || bun test
+6) Visual proof (required)
+Navigate to Midterm Exam and Final Exam in the app.
+
+Take two screenshots showing Questions 1–6 for each. The first questions must be from the banks above (e.g., NOT trolley, NOT generic “philosophy of mind”).
+
+Post screenshots + the commit diff for:
+
+shared/exams/final_exam.json
+
+shared/exams/midterm_exam.json
+
+the route/component file that imports them
+
+the deleted/disabled generator code
+
+7) Remove the junk
+Delete any files that still contain the old generic questions (paths from Step 0). Commit the deletions.
+
+8) No “creative improvements”
+Do not change wording, order, or topics. All items are drawn from Clean Phil 101 Dodge Book.docx only.

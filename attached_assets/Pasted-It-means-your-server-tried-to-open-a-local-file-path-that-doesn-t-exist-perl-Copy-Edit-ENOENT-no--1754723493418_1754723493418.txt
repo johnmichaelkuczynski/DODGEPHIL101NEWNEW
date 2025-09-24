@@ -1,0 +1,84 @@
+It means your server tried to open a local file path that doesn’t exist:
+
+perl
+Copy
+Edit
+ENOENT: no such file or directory, open './test/data/05-versions-space.pdf'
+So instead of reading the uploaded file bytes, your code is reading a string path (a leftover test path) or using disk storage pointing to a folder that isn’t there.
+
+Fix it fast:
+
+Frontend must send multipart FormData with the actual file:
+
+js
+Copy
+Edit
+const fd = new FormData();
+fd.append('file', fileInput.files[0]);
+await fetch('/api/tutor/upload', { method: 'POST', body: fd }); // no manual Content-Type
+Server must read the buffer, not a path. Use memory storage and pass the buffer to the parser:
+
+js
+Copy
+Edit
+const multer = require('multer');
+const upload = multer();                 // memoryStorage
+const mammoth = require('mammoth');
+const pdfParse = require('pdf-parse');
+
+app.post('/api/tutor/upload', upload.single('file'), async (req, res) => {
+  try {
+    if (!req.file?.buffer) return res.status(400).json({ error: 'No file uploaded' });
+    const name = (req.file.originalname || '').toLowerCase();
+    let text = '';
+
+    if (name.endsWith('.docx')) {
+      const { value } = await mammoth.extractRawText({ buffer: req.file.buffer });
+      text = value || '';
+    } else if (name.endsWith('.pdf')) {
+      const out = await pdfParse(req.file.buffer);
+      text = out.text || '';
+    } else if (name.endsWith('.txt') || name.endsWith('.md')) {
+      text = req.file.buffer.toString('utf8');
+    } else {
+      return res.status(415).json({ error: 'Unsupported file type' });
+    }
+
+    if (!text.trim()) return res.status(422).json({ error: 'Could not extract text' });
+    res.json({ ok: true, text });
+  } catch (e) {
+    res.status(500).json({ error: String(e) });
+  }
+});
+Delete any code that does things like:
+
+js
+Copy
+Edit
+pdfParse('./test/data/05-versions-space.pdf') // WRONG
+fs.readFileSync('./test/data/...')            // WRONG
+If you intentionally use disk storage, create the folder first:
+
+js
+Copy
+Edit
+fs.mkdirSync('./uploads', { recursive: true });
+…but memory + req.file.buffer is simpler and avoids ENOENT.
+
+Do the above and the ENOENT goes away; the tutor will receive real text instead of a missing file path.
+
+
+
+
+
+
+
+
+
+Ask ChatGPT
+
+
+
+
+
+ChatGPT can

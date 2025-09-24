@@ -1,0 +1,315 @@
+import type { Express } from "express";
+import express from "express";
+import { createServer, type Server } from "http";
+import session from "express-session";
+import connectPgSimple from "connect-pg-simple";
+import { storage } from "./storage";
+import { generateAIResponse, generateRewrite, generatePassageExplanation, generatePassageDiscussionResponse, generateQuiz, generateStudyGuide, generateStudentTest } from "./services/ai-models";
+import { generatePodcast, generatePreviewScript } from "./services/podcast-generator";
+import { podcasts } from "@shared/schema";
+import { eq, desc, and } from "drizzle-orm";
+
+import { getFullDocumentContent } from "./services/document-processor";
+
+import { generatePDF } from "./services/pdf-generator";
+import { transcribeAudio } from "./services/speech-service";
+import { register, login, createSession, getUserFromSession, canAccessFeature, getPreviewResponse, isAdmin, hashPassword } from "./auth";
+import { createPaypalOrder, capturePaypalOrder, loadPaypalDefault, verifyPaypalTransaction } from "./safe-paypal";
+import { chatRequestSchema, instructionRequestSchema, rewriteRequestSchema, quizRequestSchema, studyGuideRequestSchema, studentTestRequestSchema, submitTestRequestSchema, registerRequestSchema, loginRequestSchema, purchaseRequestSchema, podcastRequestSchema, diagnosticQuestions, diagnosticAnswers, type AIModel } from "@shared/schema";
+import multer from "multer";
+import { ObjectStorageService } from "./objectStorage";
+import { db } from "./db";
+
+declare module 'express-session' {
+  interface SessionData {
+    userId?: number;
+  }
+}
+
+// Helper function to extract sections from document based on reference
+async function extractSectionFromDocument(fullDocument: string, sectionReference: string): Promise<string> {
+  // Simple section extraction logic - can be enhanced with AI for better understanding
+  const lines = fullDocument.split('\n');
+  const sectionRef = sectionReference.toLowerCase();
+  
+  // Common section patterns
+  const patterns = [
+    new RegExp(`chapter\\s+${sectionRef.replace(/[^a-zA-Z0-9]/g, '\\s*')}`, 'i'),
+    new RegExp(`section\\s+${sectionRef.replace(/[^a-zA-Z0-9]/g, '\\s*')}`, 'i'),
+    new RegExp(`part\\s+${sectionRef.replace(/[^a-zA-Z0-9]/g, '\\s*')}`, 'i'),
+    new RegExp(`${sectionRef.replace(/[^a-zA-Z0-9]/g, '\\s*')}`, 'i')
+  ];
+  
+  let startIndex = -1;
+  let endIndex = lines.length;
+  
+  // Find start of section
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i].trim();
+    if (patterns.some(pattern => pattern.test(line))) {
+      startIndex = i;
+      break;
+    }
+  }
+  
+  if (startIndex === -1) {
+    // If no exact match, try to find similar references in instructions
+    for (let i = 0; i < lines.length; i++) {
+      const line = lines[i].trim();
+      if (line.toLowerCase().includes(sectionRef)) {
+        startIndex = i;
+        break;
+      }
+    }
+  }
+  
+  if (startIndex === -1) {
+    return ''; // Section not found
+  }
+  
+  // Find end of section (next chapter/section or end of document)
+  for (let i = startIndex + 1; i < lines.length; i++) {
+    const line = lines[i].trim();
+    if (line.match(/^(chapter|section|part)\s+\d+/i) || 
+        line.match(/^#\s+(chapter|section|part)/i)) {
+      endIndex = i;
+      break;
+    }
+  }
+  
+  // Extract the section with some context
+  const sectionLines = lines.slice(Math.max(0, startIndex), Math.min(lines.length, endIndex));
+  return sectionLines.join('\n').trim();
+}
+
+export async function registerRoutes(app: Express): Promise<Server> {
+  // Session configuration with PostgreSQL store for production
+  const sessionConfig: session.SessionOptions = {
+    secret: process.env.SESSION_SECRET || 'living-book-secret-key',
+    resave: false,
+    saveUninitialized: false,
+    cookie: {
+      secure: process.env.NODE_ENV === 'production', // Enable secure cookies in production
+      httpOnly: true,
+      maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
+    },
+  };
+
+  // Use PostgreSQL session store for production, memory store for development
+  if (process.env.NODE_ENV === 'production' && process.env.DATABASE_URL) {
+    try {
+      const PgSession = connectPgSimple(session);
+      sessionConfig.store = new PgSession({
+        conString: process.env.DATABASE_URL,
+        tableName: 'session',
+        createTableIfMissing: true,
+        pruneSessionInterval: 60 * 15, // 15 minutes
+        errorLog: console.error
+      });
+      console.log('Using PostgreSQL session store for production');
+    } catch (error) {
+      console.error('Failed to initialize PostgreSQL session store, falling back to memory store:', error);
+      console.log('Using memory session store as fallback');
+    }
+  } else {
+    console.log('Using memory session store for development');
+  }
+
+  app.use(session(sessionConfig));
+
+  // Configure multer for audio file uploads
+  const audioUpload = multer({ 
+    storage: multer.memoryStorage(),
+    limits: { fileSize: 10 * 1024 * 1024 } // 10MB limit
+  });
+
+  // Helper function to get current user
+  const getCurrentUser = async (req: any) => {
+    if (!req.session?.userId) return null;
+    return await storage.getUserById(req.session.userId);
+  };
+
+  // Middleware to require authentication
+  const requireAuth = async (req: any, res: any, next: any) => {
+    const user = await getCurrentUser(req);
+    if (!user) {
+      return res.status(401).json({ error: "Authentication required" });
+    }
+    req.user = user;
+    next();
+  };
+
+  // Generate lecture endpoint
+  app.post('/api/lecture/generate', async (req, res) => {
+    try {
+      const { weekNumber, topic, courseMaterial, aiModel = 'openai' } = req.body;
+      
+      let lectureContent;
+
+      // Generate lecture using the selected AI model
+      if (aiModel === 'anthropic') {
+        if (!process.env.ANTHROPIC_API_KEY) {
+          return res.status(500).json({ error: 'Anthropic API key not configured' });
+        }
+
+        const anthropicResponse = await fetch('https://api.anthropic.com/v1/messages', {
+          method: 'POST',
+          headers: {
+            'x-api-key': process.env.ANTHROPIC_API_KEY,
+            'Content-Type': 'application/json',
+            'anthropic-version': '2023-06-01'
+          },
+          body: JSON.stringify({
+            model: 'claude-3-sonnet-20240229',
+            max_tokens: 3000,
+            messages: [{
+              role: 'user',
+              content: `You are a professor creating a comprehensive lecture summary for an introduction to philosophy course. Create an engaging, educational summary that covers key concepts, examples, and learning objectives.
+
+Course Context: This is Week ${weekNumber} covering "${topic}".
+
+Create a lecture summary that includes:
+1. Learning objectives for the week
+2. Key concepts and definitions
+3. Practical examples with explanations
+4. Important theorems or principles
+5. Common mistakes to avoid
+6. Connections to previous weeks
+7. Preview of next week's topics
+
+Format as structured content with clear headings and bullet points. Make it comprehensive but accessible for university students.
+
+Create lecture summary for Week ${weekNumber}: ${topic}. Include relevant course material context: ${courseMaterial}`
+            }]
+          })
+        });
+
+        const anthropicData = await anthropicResponse.json();
+        if (!anthropicResponse.ok) {
+          throw new Error(`Anthropic API error: ${anthropicData.error?.message || 'Unknown error'}`);
+        }
+        lectureContent = anthropicData.content[0].text;
+
+      } else if (aiModel === 'perplexity') {
+        if (!process.env.PERPLEXITY_API_KEY) {
+          return res.status(500).json({ error: 'Perplexity API key not configured' });
+        }
+
+        const perplexityResponse = await fetch('https://api.perplexity.ai/chat/completions', {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${process.env.PERPLEXITY_API_KEY}`,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            model: 'llama-3.1-sonar-small-128k-online',
+            messages: [{
+              role: 'user',
+              content: `You are a professor creating a comprehensive lecture summary for an introduction to philosophy course. Create an engaging, educational summary that covers key concepts, examples, and learning objectives.
+
+Course Context: This is Week ${weekNumber} covering "${topic}".
+
+Create a lecture summary that includes:
+1. Learning objectives for the week
+2. Key concepts and definitions
+3. Practical examples with explanations
+4. Important theorems or principles
+5. Common mistakes to avoid
+6. Connections to previous weeks
+7. Preview of next week's topics
+
+Format as structured content with clear headings and bullet points. Make it comprehensive but accessible for university students.
+
+Create lecture summary for Week ${weekNumber}: ${topic}. Include relevant course material context: ${courseMaterial}`
+            }],
+            temperature: 0.7,
+            max_tokens: 3000
+          })
+        });
+
+        const perplexityData = await perplexityResponse.json();
+        if (!perplexityResponse.ok) {
+          throw new Error(`Perplexity API error: ${perplexityData.error?.message || 'Unknown error'}`);
+        }
+        lectureContent = perplexityData.choices[0].message.content;
+
+      } else {
+        // Default to OpenAI
+        if (!process.env.OPENAI_API_KEY) {
+          return res.status(500).json({ error: 'OpenAI API key not configured' });
+        }
+
+        const openaiResponse = await fetch('https://api.openai.com/v1/chat/completions', {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            model: 'gpt-4o',
+            messages: [
+              {
+                role: 'system',
+                content: 'You are a professor creating comprehensive lecture summaries for an introduction to philosophy course. Create engaging, educational content that covers key concepts, examples, and learning objectives.'
+              },
+              {
+                role: 'user',
+                content: `Create a lecture summary for Week ${weekNumber}: ${topic}. Include relevant course material context: ${courseMaterial}
+
+Create a lecture summary that includes:
+1. Learning objectives for the week
+2. Key concepts and definitions
+3. Practical examples with explanations
+4. Important theorems or principles
+5. Common mistakes to avoid
+6. Connections to previous weeks
+7. Preview of next week's topics
+
+Format as structured content with clear headings and bullet points. Make it comprehensive but accessible for university students.`
+              }
+            ],
+            temperature: 0.7,
+            max_tokens: 3000
+          })
+        });
+
+        const openaiData = await openaiResponse.json();
+        
+        if (!openaiResponse.ok) {
+          throw new Error(`OpenAI API error: ${openaiData.error?.message || 'Unknown error'}`);
+        }
+
+        lectureContent = openaiData.choices[0].message.content;
+      }
+      
+      res.json({ 
+        success: true, 
+        lecture: lectureContent,
+        weekNumber,
+        aiModel 
+      });
+
+    } catch (error) {
+      console.error('Lecture generation error:', error);
+      res.status(500).json({ 
+        error: 'Failed to generate lecture',
+        details: error instanceof Error ? error instanceof Error ? error.message : "Unknown error" : "Unknown error"
+      });
+    }
+  });
+
+  // DISABLED: Generate homework endpoint - UI kept but backend functionality removed
+  app.post('/api/homework/generate', async (req, res) => {
+    res.json({ 
+      success: true,
+      homework: {
+        id: 'disabled',
+        weekNumber: req.body.weekNumber || 1,
+        topic: req.body.topic || 'Assignment functionality disabled',
+        content: 'Assignment functionality has been disabled. UI preserved for demonstration purposes.',
+        timestamp: new Date().toISOString()
+      }
+    });
+  });
+
+  // DISABLED: Generate homework endpoint - old implementation code removed

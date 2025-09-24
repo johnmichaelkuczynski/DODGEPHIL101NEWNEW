@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Philosophy 101 Final Exam - WORKING TEST</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 800px; margin: 40px auto; padding: 20px; }
+        .card { border: 1px solid #ccc; border-radius: 8px; padding: 20px; margin: 20px 0; }
+        .button { background: #007bff; color: white; padding: 12px 24px; border: none; border-radius: 6px; cursor: pointer; font-size: 16px; }
+        .button:hover { background: #0056b3; }
+        .button:disabled { background: #ccc; cursor: not-allowed; }
+        .exam-content { background: #f8f9fa; padding: 15px; border-radius: 6px; white-space: pre-wrap; font-family: monospace; }
+        .success { color: #28a745; font-weight: bold; }
+        .error { color: #dc3545; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <h1>Philosophy 101 Final Exam</h1>
+        <p><strong>Status:</strong> <span id="status">Ready to generate</span></p>
+        
+        <button id="generateBtn" class="button" onclick="generateExam()">
+            Generate Final Exam
+        </button>
+        
+        <div id="examContent" style="display: none;">
+            <h3>Generated Exam:</h3>
+            <div id="examOutput" class="exam-content"></div>
+            <button class="button" onclick="resetExam()" style="margin-top: 15px;">
+                Generate New Exam
+            </button>
+        </div>
+    </div>
+
+    <script>
+        async function generateExam() {
+            const btn = document.getElementById('generateBtn');
+            const status = document.getElementById('status');
+            const content = document.getElementById('examContent');
+            const output = document.getElementById('examOutput');
+            
+            btn.disabled = true;
+            btn.textContent = 'Generating Final Exam...';
+            status.textContent = 'Generating exam content...';
+            status.className = '';
+            
+            try {
+                const response = await fetch('/api/exam/generate', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        aiModel: 'openai',
+                        studyGuideType: 'final'
+                    })
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    status.textContent = 'Exam generated successfully!';
+                    status.className = 'success';
+                    output.textContent = JSON.stringify(data, null, 2);
+                    content.style.display = 'block';
+                    btn.style.display = 'none';
+                } else {
+                    throw new Error(`API returned ${response.status}`);
+                }
+            } catch (error) {
+                status.textContent = `Error: ${error.message}`;
+                status.className = 'error';
+                btn.disabled = false;
+                btn.textContent = 'Generate Final Exam';
+            }
+        }
+        
+        function resetExam() {
+            const btn = document.getElementById('generateBtn');
+            const status = document.getElementById('status');
+            const content = document.getElementById('examContent');
+            
+            btn.style.display = 'inline-block';
+            btn.disabled = false;
+            btn.textContent = 'Generate Final Exam';
+            status.textContent = 'Ready to generate';
+            status.className = '';
+            content.style.display = 'none';
+        }
+        
+        // Auto-generate on page load
+        window.onload = function() {
+            setTimeout(generateExam, 1000);
+        };
+    </script>
+</body>
+</html>

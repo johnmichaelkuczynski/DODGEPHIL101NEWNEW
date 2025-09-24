@@ -1,0 +1,84 @@
+
+ZHI SYSTEMS — SYMBOLIC LOGIC COURSE APP (CLONE VERSION)
+
+THIS APP IS A CLONE OF THE SYMBOLIC LOGIC LIVING BOOK, BUT THE COURSE PART IS ENTIRELY SEPARATE.
+
+⚠️ READ THIS CAREFULLY:
+
+YOU ARE BUILDING A NEW APP THAT CONTAINS TWO SYSTEMS IN PARALLEL:
+
+1. THE ORIGINAL SYMBOLIC LOGIC LIVING BOOK
+2. A FULL UNIVERSITY-LEVEL COURSE BUILT AROUND IT
+
+THE LIVING BOOK IS ONE TAB. EXACTLY ONE TAB. ITS UI AND LOGIC **DO NOT CARRY OVER** INTO THE REST OF THE APP. DO NOT MERGE THEM.
+
+——————————————————————————
+TAB STRUCTURE:
+
+TAB 1: "Living Book"
+- This tab is an exact clone of the Symbolic Logic Living Book app.
+- Must preserve 100% of the original features:
+  - Rewrite
+  - Study Guide
+  - Podcast
+  - Ask-the-Book
+- DO NOT modify, extract, repackage, or re-integrate this logic into the course system.
+- This is the original Living Book, contained within one tab only.
+
+TAB 2: "Syllabus"
+- A separate, functional course syllabus
+- Shows week-by-week schedule with:
+  - Topic (clickable)
+  - Linked Living Book section (opens Tab 1)
+  - Due assignments with real-time status:
+    ✅ Completed
+    ❗ Overdue
+    ⏳ Not Yet Due
+
+TAB 3: "Modules"
+- One module per week (Week 1–6, Midterm, Final)
+- Each module contains:
+  - LLM-generated lecture summary
+  - Link to correct Living Book section (opens Tab 1)
+  - Graded Homework (LLM-generated, GPTZero-enforced, timed)
+  - Graded Quiz or Test (if applicable)
+
+TAB 4: "Practice Center"
+- User can generate unlimited practice versions of:
+  - Homework
+  - Tests
+  - Midterm
+  - Final
+- Practice items are not scored, saved, or limited
+
+TAB 5: "My Grades"
+- Shows all assignment grades
+- Applies automatic 0 for:
+  - Late submission
+  - GPTZero score > 50%
+- Final grade:
+    - Homework: 25%
+    - Midterm: 35%
+    - Final Exam: 40%
+
+——————————————————————————
+NON-NEGOTIABLE RULES:
+
+1. DO NOT BLEND THE LIVING BOOK UI OR CODE INTO COURSE TABS.
+2. DO NOT REUSE ITS FUNCTIONALITY OUTSIDE OF TAB 1.
+3. DO NOT HARD-CODE QUESTIONS, ANSWERS, OR GRADING RULES.
+4. DO NOT USE IN-CODE GRADING LOGIC. THE LLM MUST DO ALL GRADING.
+5. DO NOT GENERATE STATIC ASSIGNMENTS OR LECTURES.
+
+ALL COURSE CONTENT (homeworks, tests, lectures, practice) MUST BE GENERATED DYNAMICALLY BY THE LLM, IN REAL TIME.
+
+GPTZERO is used for detection only. GPTZero score > 50% = auto-zero. No exceptions.
+
+——————————————————————————
+SUMMARY:
+
+- Tab 1 is a pure Living Book clone. Do not touch or modify.
+- Tabs 2–5 are a new course layer. They must remain logically, visually, and functionally distinct from the book.
+- Nothing from the book carries into the course tabs except for clickable links to sections.
+
+THIS IS THE FINAL, IMPLEMENTATION-READY SPEC.

@@ -1,0 +1,57 @@
+You're absolutely right to be pissed — that is not a mind map. That’s a glorified list of boxes. It’s structured content, sure — but it fails the core visual function of a mind map:
+
+It’s supposed to be a map — with directional links between ideas.
+
+❌ What’s Missing:
+1. No arrows / connectors / edges
+There’s no visual indication of how the nodes relate (support, objection, example, etc.)
+
+Every node just floats alone. This is a card wall, not a map.
+
+2. No hierarchy or spatial logic
+The "central" node is just stuck in the middle of a grid
+
+Supporting nodes aren’t branching from or feeding into anything — there’s no visual topology
+
+3. No flow
+In a mind map, you should see paths:
+
+From general → specific
+
+From premise → conclusion
+
+From parent → child
+Here, it’s just scattered boxes.
+
+✅ What It Should Look Like:
+Picture this:
+
+yaml
+Copy
+Edit
+                      Central Idea
+                           |
+        -------------------------------------
+        |            |           |          |
+   Supporting   Objection   Example    Implication
+        |
+   Sub-subpoints
+Each arrow has meaning (supports, contradicts, elaborates), and each node’s position reflects logical depth or semantic role.
+
+✅ VERBATIM FIX INSTRUCTION FOR REPLIT AGENT:
+The current layout is a static grid of labeled content boxes. That is not a mind map.
+
+Replace this layout with a graph-based layout using vis.js, react-flow, or cytoscape.js.
+
+Each node (central, supporting, example, etc.) should be connected with visible edges/arrows that show the direction and relationship.
+
+For example:
+– Central idea → Supporting node (labeled "supports")
+– Supporting node → Example node (labeled "illustrates")
+– Objection node → Supporting node (labeled "contradicts")
+
+Use color-coded arrows or tooltips if needed.
+
+The visual layout should follow either a radial map (mind-map style) or a top-down tree (argument-map style).
+
+Current floating grid must be replaced. The point of a mind map is to show relationships, flow, and structure, not to just stack boxes.

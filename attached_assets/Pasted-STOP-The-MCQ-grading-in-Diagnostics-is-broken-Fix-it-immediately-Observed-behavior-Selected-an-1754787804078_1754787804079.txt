@@ -1,0 +1,100 @@
+STOP. The MCQ grading in Diagnostics is broken. Fix it immediately.
+
+Observed behavior:
+
+Selected answer is marked incorrect even when it matches the correctAnswer from the payload.
+
+No semantic check or rationale provided.
+
+Logic is failing at the comparison layer before LLM grading is even reached.
+
+REQUIRED FIXES:
+
+Normalize correctAnswer and student answer before comparing
+
+Trim whitespace.
+
+Uppercase single-letter MCQ keys ('a' → 'A').
+
+For short answers, send to LLM grader (no literal matching).
+
+ts
+Copy
+Edit
+function isMCQCorrect(selected: string, key: string) {
+  return selected?.trim().toUpperCase() === key?.trim().toUpperCase();
+}
+Do not hard-code correctness in the UI
+
+The backend must return:
+
+json
+Copy
+Edit
+{ "verdict": "correct" | "incorrect", "score": 1 | 0, "rationale": "..." }
+The UI only displays based on verdict, not on its own string match.
+
+For MCQ, grading pipeline is:
+
+Compare normalized selected vs. answerKey.
+
+If match → verdict "correct", score 1.
+
+If mismatch → verdict "incorrect", score 0.
+
+Always call LLM to generate a rationale explaining the correct choice and why others are wrong.
+
+Display rationale in the red/green feedback area.
+
+MCQ: correctAnswer letter and text + rationale.
+
+Short: model answer + rationale.
+
+Acceptance tests:
+
+Selecting the exact correct option marks "correct".
+
+Selecting a wrong option marks "incorrect".
+
+Case-insensitive letters (a or A) work.
+
+Whitespace doesn’t affect correctness.
+
+Rationale always appears.
+
+If you give them this, they can’t hide behind “it’s the LLM’s fault” — the bug is clearly in the UI/backend answer comparison.
+
+Do you want me to also include the exact MCQ grading function so they can just drop it in? That would make it impossible for them to mess up the comparison logic again.
+
+
+
+
+
+
+
+
+You said:
+IS THERE A CORRECT ANSWER THERE?
+
+
+ChatGPT said:
+
+Thought for 5s
+Yes. The correct negation is A. ∃x (P(x) ∧ ∀y ¬Q(x,y)).
+
+Reason (2 steps):
+
+¬∀x φ ⇔ ∃x ¬φ
+
+¬(P(x) ⇒ ∃y Q(x,y)) ⇔ P(x) ∧ ¬∃y Q(x,y) ⇔ P(x) ∧ ∀y ¬Q(x,y)
+
+So the app marked a correct answer as wrong.
+
+
+
+
+
+
+
+
+You said:

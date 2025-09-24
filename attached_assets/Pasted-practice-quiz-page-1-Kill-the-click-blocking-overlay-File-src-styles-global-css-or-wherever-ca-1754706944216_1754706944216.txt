@@ -1,0 +1,113 @@
+practice/quiz page.
+
+1) Kill the click-blocking overlay
+File: src/styles/global.css (or wherever .card, .study-card, or .overlay styles live)
+
+Change: remove pointer-events: none; and fix stacking.
+
+css
+Copy
+Edit
+/* BEFORE (what breaks clicks) */
+/* .overlay { position:absolute; inset:0; pointer-events:none; ... } */
+
+.overlay { 
+  position: absolute;
+  inset: 0;
+  /* REMOVE pointer-events:none; */
+}
+
+.study-card,
+.card {
+  position: relative;
+}
+
+.testme-btn {
+  position: relative;
+  z-index: 2;        /* ensure above any overlay */
+}
+If you actually need the overlay for hover/fade, keep it but do not use pointer-events: none on the button’s ancestors. If any ancestor has it, remove it.
+
+2) Make the “Test Me” buttons actually navigate
+Assuming your quiz route is /courses/practice?week=1 (adjust if yours is different).
+
+File: src/components/StudyGuide.tsx
+(If it’s app/components/StudyGuide.tsx or similar, use that exact path.)
+
+Replace each dead button block with this:
+
+tsx
+Copy
+Edit
+import Link from "next/link";
+
+/* ...inside your card for Week 1... */
+<Link
+  href="/courses/practice?week=1"
+  className="testme-btn inline-flex items-center rounded-md px-3 py-2 text-sm font-semibold shadow-sm"
+>
+  Test Me
+</Link>
+
+/* Week 2 */
+<Link href="/courses/practice?week=2" className="testme-btn inline-flex items-center rounded-md px-3 py-2 text-sm font-semibold shadow-sm">
+  Test Me
+</Link>
+
+/* Week 3 */
+<Link href="/courses/practice?week=3" className="testme-btn inline-flex items-center rounded-md px-3 py-2 text-sm font-semibold shadow-sm">
+  Test Me
+</Link>
+If you prefer to keep <button>, wire it explicitly:
+
+tsx
+Copy
+Edit
+"use client";
+import { useRouter } from "next/navigation";
+
+function TestMe({ week }: { week: number }) {
+  const router = useRouter();
+  return (
+    <button
+      type="button"
+      className="testme-btn inline-flex items-center rounded-md px-3 py-2 text-sm font-semibold shadow-sm"
+      onClick={() => router.push(`/courses/practice?week=${week}`)}
+    >
+      Test Me
+    </button>
+  );
+}
+Then in the cards:
+
+tsx
+Copy
+Edit
+<TestMe week={1} />
+<TestMe week={2} />
+<TestMe week={3} />
+3) Ensure the route exists
+File: src/app/courses/practice/page.tsx (Next.js app dir)
+(or src/pages/courses/practice.tsx if using pages router)
+
+Add a simple guard to read week:
+
+tsx
+Copy
+Edit
+import { redirect } from "next/navigation";
+
+export default function PracticePage({ searchParams }: { searchParams: { week?: string } }) {
+  const week = searchParams?.week;
+  if (!week) redirect("/courses/modules"); // or a sensible default
+  // pass `week` into your quiz generator/component
+  return <PracticeQuiz week={Number(week)} />;
+}
+4) Quick sanity checks
+Buttons must not be inside a <form> that auto-submits; if they are, add type="button".
+
+No ancestor of the button should have pointer-events: none;
+
+No full-width invisible element covering the card (position:absolute; inset:0; z-index:9999)—if present, lower its z-index below the button or set pointer-events:none on that overlay only.
+
+Tell the agent to make exactly these edits and push. This will unblock the clicks and route each “Test Me” to the correct practice view.

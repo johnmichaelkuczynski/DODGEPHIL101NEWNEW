@@ -1,0 +1,112 @@
+I AM TRYING TO MAKE IT POSSIBLE FO RTHE USER TO UPLOAD DOCUMENTS IN THE TUTOR ME FUNCTION BUT REPLIT KEEPS FUCNKING IT UP
+
+ChatGPT said:
+
+Thought for 14s
+Got it—the “corrupted/metadata XML” message means you’re feeding the raw .docx zip (or PDF bytes) straight to the tutor instead of parsing it to text first. Fix it in 10 tight steps.
+
+Do this now
+Install parsers (Replit shell):
+
+css
+Copy
+Edit
+npm i multer mammoth pdf-parse
+Server: add a dedicated upload route (don’t run JSON middleware on this route).
+
+File: server.js (or your API file)
+
+Add at top:
+
+js
+Copy
+Edit
+const multer = require('multer');
+const upload = multer({ limits: { fileSize: 25 * 1024 * 1024 } }); // 25MB
+const mammoth = require('mammoth');
+const pdfParse = require('pdf-parse');
+Route (multipart only):
+
+js
+Copy
+Edit
+app.post('/api/tutor/upload', upload.single('file'), async (req, res) => {
+  try {
+    if (!req.file) return res.status(400).json({ error: 'No file' });
+    const name = (req.file.originalname || '').toLowerCase();
+
+    let text = '';
+    if (name.endsWith('.docx')) {
+      const { value } = await mammoth.extractRawText({ buffer: req.file.buffer });
+      text = value || '';
+    } else if (name.endsWith('.pdf')) {
+      const out = await pdfParse(req.file.buffer);
+      text = out.text || '';
+    } else if (name.endsWith('.txt') || name.endsWith('.md')) {
+      text = req.file.buffer.toString('utf8');
+    } else {
+      return res.status(415).json({ error: 'Unsupported file type' });
+    }
+
+    text = text.trim();
+    if (!text) return res.status(422).json({ error: 'Could not extract text' });
+
+    return res.json({ ok: true, text });
+  } catch (e) {
+    return res.status(500).json({ error: String(e) });
+  }
+});
+Make sure your JSON body parser does NOT touch this route.
+
+If you have app.use(express.json()), keep it—but do not also parse this route as JSON or you’ll corrupt the stream.
+
+Frontend: send multipart, not JSON.
+
+Your “Upload Document” button must submit a FormData with the file:
+
+js
+Copy
+Edit
+async function uploadDoc(file) {
+  const fd = new FormData();
+  fd.append('file', file);
+  const res = await fetch('/api/tutor/upload', { method: 'POST', body: fd });
+  if (!res.ok) throw new Error(await res.text());
+  return res.json(); // { ok, text }
+}
+Do not set Content-Type manually; the browser will set the proper multipart boundary.
+
+Pipe the returned text into your Tutor prompt, not the raw file bytes.
+
+UI guardrails:
+
+Accept only: .pdf,.docx,.txt,.md
+
+Max size: match server limit (25 MB above)
+
+If server returns {error}, show it verbatim under the upload card.
+
+Quick verification (shell):
+
+bash
+Copy
+Edit
+curl -F "file=@/path/to/sample.docx" http://localhost:3000/api/tutor/upload
+curl -F "file=@/path/to/sample.pdf"  http://localhost:3000/api/tutor/upload
+You should see JSON with a text field that begins with your document’s content, not [Content_Types].xml.
+
+Common breakages causing your screenshot:
+
+Posting file with Content-Type: application/json.
+
+Trying to JSON.parse the upload response when the server actually returned HTML error.
+
+Reading .docx as plain text (gives OpenXML parts like _rels/.rels and [Content_Types].xml).
+
+Using a proxy/auth layer that returns an HTML page on this route—keep this endpoint open or return JSON on auth failures.
+
+Production sanity checks:
+
+Trim to first ~200–300 words for preview if user is not logged in (your preview model).
+
+Store nothing server-side unless the user is authenticated/paid.

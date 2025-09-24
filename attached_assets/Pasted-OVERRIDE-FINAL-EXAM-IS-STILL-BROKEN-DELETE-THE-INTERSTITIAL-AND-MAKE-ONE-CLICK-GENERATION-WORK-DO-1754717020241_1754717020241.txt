@@ -1,0 +1,86 @@
+OVERRIDE. FINAL EXAM IS STILL BROKEN. DELETE THE INTERSTITIAL AND MAKE ONE-CLICK GENERATION WORK. DO NOT MARK DONE UNTIL YOU PROVIDE A 20-SECOND SCREEN RECORDING SHOWING THE FLOW.
+
+0) Remove the interstitial entirely
+Delete the component that renders the Final Exam inside any Modal/Sheet/Dialog/Overlay/Drawer.
+
+Delete any “container” component that mounts the exam view in a lightbox layered over the modules page.
+
+Remove all imports/usages of Modal/Sheet/Dialog for the Final Exam flow.
+
+The Final Exam must render as a plain, full page view.
+
+1) Route must be a full page
+Final Exam lives at its own route (e.g., /final-exam or whatever you already created).
+
+Navigating to that route must never open a modal; it must show a full page with one button centered: Generate Final Exam.
+
+No other CTAs on that page.
+
+2) Button click must fire exactly one request
+Ensure the button is not inside a <form>.
+
+Ensure there is only one click handler bound to it. Remove all others.
+
+Ensure no overlay or parent has pointer-events blocking clicks.
+
+On click: disable button, show inline text “Generating exam…”, call the single exam generation endpoint.
+
+3) No second step, no extra button, no modal
+The generation must happen immediately after the single click.
+
+Do not show a second “Generate” button anywhere.
+
+Do not navigate to another interstitial.
+
+Do not show alerts/popups. Errors must render inline on this page and re-enable the button.
+
+4) Endpoint behavior
+Timeout ≥ 120s.
+
+429/503 → retry once after 1.5s.
+
+On success: render the exam on the same page (MC/SA/Essay).
+
+On failure: inline message with the real reason; button re-enabled.
+
+5) Persistence per attempt
+Freeze the generated set for the attempt; page refresh shows the same set.
+
+After submit/cancel, show Generate New Exam (creates a brand-new set). That control must not appear before.
+
+6) Acceptance checklist (must all be TRUE)
+ No Modal/Sheet/Dialog/Overlay anywhere in Final Exam flow (files removed).
+
+ Final Exam is a full page with one button only.
+
+ One click → inline “Generating exam…” → exam renders on that page.
+
+ No second “generate” button appears.
+
+ No popups; errors are inline and actionable.
+
+ Refresh mid-attempt preserves the same exam.
+
+ After completion, “Generate New Exam” appears and creates a different set.
+
+7) Proof required
+Provide a screen recording showing:
+
+Visiting the Final Exam route (full page, one button).
+
+Single click → inline loader → exam appears.
+
+Simulated failure (temporarily break the key), showing inline error and re-enabled button.
+
+Refresh preserving the attempt.
+
+Completion and “Generate New Exam” producing a new set.
+
+Also paste the list of deleted files (all modal/overlay components that were previously wrapping the exam).
+
+8) Emergency fallback (if button still fails after 30 minutes)
+Temporarily auto-generate on page load (no button) so the exam appears immediately when the route opens.
+
+Keep this only as a temporary measure; then restore the single-button flow once fixed.
+
+Do not claim completion until the video and deleted-file list are provided and every checklist item is verified.

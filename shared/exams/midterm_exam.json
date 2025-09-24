@@ -1,0 +1,132 @@
+[
+  {
+    "id": "M1",
+    "type": "mc",
+    "points": 2,
+    "prompt": "Which branch of philosophy studies the nature of knowledge?",
+    "choices": ["Metaphysics", "Epistemology", "Ethics", "Logic"],
+    "answer": "Epistemology"
+  },
+  {
+    "id": "M2", 
+    "type": "mc",
+    "points": 2,
+    "prompt": "In Plato's Allegory of the Cave, what do the shadows on the wall represent?",
+    "choices": ["True reality", "Illusions that prisoners mistake for reality", "The philosopher's knowledge", "The outside world"],
+    "answer": "Illusions that prisoners mistake for reality"
+  },
+  {
+    "id": "M3",
+    "type": "mc", 
+    "points": 2,
+    "prompt": "According to Frankfurt, what distinguishes lying from bullshit?",
+    "choices": ["Lies are always harmful", "Bullshit shows indifference to truth", "Lies are more convincing", "Bullshit is always intentional"],
+    "answer": "Bullshit shows indifference to truth"
+  },
+  {
+    "id": "M4",
+    "type": "mc",
+    "points": 2, 
+    "prompt": "What is the main problem with justified true belief as a definition of knowledge according to Gettier?",
+    "choices": ["It's too restrictive", "It allows false beliefs to count as knowledge", "It can be satisfied by lucky guesses", "It requires certainty"],
+    "answer": "It can be satisfied by lucky guesses"
+  },
+  {
+    "id": "M5",
+    "type": "mc",
+    "points": 2,
+    "prompt": "The interaction problem in mind-body dualism asks:",
+    "choices": ["How minds interact with other minds", "How non-physical minds can affect physical bodies", "How the brain processes information", "How consciousness emerges"],
+    "answer": "How non-physical minds can affect physical bodies"
+  },
+  {
+    "id": "M6",
+    "type": "sa",
+    "points": 5,
+    "prompt": "Name two key differences between epistemology and metaphysics as described in the course text."
+  },
+  {
+    "id": "M7",
+    "type": "sa", 
+    "points": 5,
+    "prompt": "Explain the three stages of enlightenment in Plato's Allegory of the Cave."
+  },
+  {
+    "id": "M8",
+    "type": "sa",
+    "points": 5,
+    "prompt": "Define Frankfurt's three categories of speech acts: truth-telling, lying, and bullshit."
+  },
+  {
+    "id": "M9",
+    "type": "sa",
+    "points": 5,
+    "prompt": "Describe the Brown in Barcelona Gettier case and explain why it challenges justified true belief."
+  },
+  {
+    "id": "M10", 
+    "type": "sa",
+    "points": 5,
+    "prompt": "Explain Cartesian dualism and state one major objection to it."
+  },
+  {
+    "id": "M11",
+    "type": "essay",
+    "points": 10,
+    "prompt": "Summarize Plato's Allegory of the Cave and explain its philosophical significance regarding the nature of reality and knowledge."
+  },
+  {
+    "id": "M12",
+    "type": "essay", 
+    "points": 10,
+    "prompt": "Present and analyze a Gettier case. Explain how it challenges the traditional definition of knowledge as justified true belief."
+  },
+  {
+    "id": "M13",
+    "type": "essay",
+    "points": 10,
+    "prompt": "Compare and contrast Frankfurt's concepts of lying and bullshit. Provide original examples of each."
+  },
+  {
+    "id": "M14",
+    "type": "essay",
+    "points": 10,
+    "prompt": "Explain the interaction problem for mind-body dualism. Present one proposed solution and evaluate its effectiveness."
+  },
+  {
+    "id": "M15",
+    "type": "essay",
+    "points": 10,
+    "prompt": "Analyze Moore's response to radical skepticism. Is his pragmatic approach sufficient to refute skeptical arguments?"
+  },
+  {
+    "id": "M16",
+    "type": "sa",
+    "points": 5,
+    "prompt": "What does the prisoner's return to the cave symbolize in Plato's allegory?"
+  },
+  {
+    "id": "M17",
+    "type": "sa",
+    "points": 5,
+    "prompt": "How does Frankfurt distinguish between caring about truth and caring about accuracy?"
+  },
+  {
+    "id": "M18",
+    "type": "sa",
+    "points": 5,
+    "prompt": "What makes a belief 'justified' in the traditional analysis of knowledge?"
+  },
+  {
+    "id": "M19",
+    "type": "sa",
+    "points": 5,
+    "prompt": "State the mind-body problem and explain why it's considered a philosophical puzzle."
+  },
+  {
+    "id": "M20",
+    "type": "sa",
+    "points": 5,
+    "prompt": "According to the course text, why is skepticism considered a serious philosophical challenge?"
+  }
+]

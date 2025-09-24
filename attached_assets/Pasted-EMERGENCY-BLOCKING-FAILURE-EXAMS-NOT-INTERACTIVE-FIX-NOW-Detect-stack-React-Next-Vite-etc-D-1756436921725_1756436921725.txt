@@ -1,0 +1,120 @@
+EMERGENCY — BLOCKING FAILURE: EXAMS NOT INTERACTIVE. FIX NOW.
+
+Detect stack (React/Next/Vite/etc). Do NOT refactor stack. Implement the following exact contract.
+
+Back end API (must exist and work):
+
+GET /api/exams/:id → returns { id, title, durationSec, questions:[ {id, type:"mcq"|"short"|"essay", prompt, choices?, answerKey?, rubric?, explanation} ] }
+
+POST /api/exams/:id/submit body: { answers:[ {questionId, value} ] }
+returns: { scorePct, perQuestion:[ {questionId, correct:boolean, feedback, expected?} ] }
+
+Implement lenient grading for short answers: trim, case-insensitive, punctuation-insensitive, allow regex list in answerKey.
+
+Never do exact string match only. Add synonyms array support.
+
+Front end pages/components (create if missing; use these paths/names):
+
+src/features/exams/ExamPage.tsx — loads exam via GET, renders runner.
+
+src/features/exams/ExamRunner.tsx — core state machine (Idle → InProgress → Submitted).
+
+src/features/exams/components/QuestionMC.tsx
+
+src/features/exams/components/QuestionShort.tsx
+
+src/features/exams/components/QuestionEssay.tsx
+
+src/features/exams/components/Timer.tsx
+
+src/features/exams/components/ResultsPanel.tsx
+
+UI requirements (non-negotiable):
+
+Each question renders with Next / Prev, numbered nav, Submit button (disabled until all required answered).
+
+MCQ: radio list; single select; selection highlights.
+
+Short: single-line input.
+
+Essay: textarea (autosize).
+
+Timer counts down from durationSec; auto-submits on zero.
+
+After submit: lock inputs; show per-question Correct/Incorrect, expected answer (if provided), and explanation.
+
+Show total score % and Retake + Review buttons.
+
+State contracts (TypeScript types; enforce):
+
+type Exam = { id:string; title:string; durationSec:number; questions: Question[] };
+type Question =
+ | { id:string; type:"mcq"; prompt:string; choices:string[]; answerKey:number; explanation?:string }
+ | { id:string; type:"short"; prompt:string; answerKey:(string|{regex:string;flags?:string})[]; explanation?:string }
+ | { id:string; type:"essay"; prompt:string; rubric?:string; explanation?:string };
+type Answer = { questionId:string; value:string|number };
+
+
+Grading rules (front end & back end must agree):
+
+MCQ: index equality.
+
+Short: value matches any normalized key OR any regex.
+
+Essay: pass through to POST /submit; back end returns feedback string; do not auto-score essay > weight essays as 0% unless server returns a numeric contribution.
+
+Seeding (so I can test instantly):
+
+Add scripts/seedExam.ts (or server bootstrap) to create exam exam-demo-001 with 6 Qs: 3 MCQ, 2 short (with regex), 1 essay (with rubric).
+
+Ensure GET /api/exams/exam-demo-001 returns the seed.
+
+Routing (must open from UI):
+
+Add route /exams/:id that mounts ExamPage.
+
+On home/dashboard, add button: “Start Practice Exam” → /exams/exam-demo-001.
+
+Submission flow (must work):
+
+ExamRunner builds {answers} from state; await POST /submit; render ResultsPanel.
+
+Handle network errors with visible banner; never fail silently.
+
+Acceptance tests (do NOT mark done until ALL pass):
+
+A. Load /exams/exam-demo-001 → questions render; no console errors.
+
+B. Answer all; click Submit → total score shows; each question shows feedback + explanation.
+
+C. Short-answer tolerance: “H2O”, “h2o”, and “water” all accepted for a seeded key that includes regex/synonyms.
+
+D. Timer hits zero → auto-submit; results still render.
+
+E. Retake resets state and timer; prior answers cleared.
+
+F. Essay returns textual feedback from server in perQuestion.feedback.
+
+G. Refresh after submit → page rehydrates and still shows results (use URL param ?state=submitted or persisted result id).
+
+H. Lighthouse/Console: no errors/warnings in console during run.
+
+Non-compliance = FAIL conditions:
+
+Any static/mock exam that can’t be taken and submitted in-app.
+
+Exact string-match grading for short answers.
+
+Missing explanations in results when explanation exists.
+
+Any console error/warning during the flow.
+
+Deliverables:
+
+Working UI and API per the above.
+
+Seeded demo exam accessible from home.
+
+A short README-EXAMS.md (root) with: how to run, seed, and test steps A–H.
+
+Implement exactly as written. Do not argue. Report back only when A–H all pass.

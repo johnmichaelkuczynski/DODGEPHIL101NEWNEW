@@ -1,0 +1,58 @@
+MIDTERM EXAM
+(Covers roughly first half of course content: Branches of Philosophy, Allegory of the Cave, Truth/Lie/Bullshit, Skepticism, Gettier Cases, Mind/Body Dualism)
+
+Multiple Choice (2 pts each)
+
+Which branch of philosophy studies the nature of knowledge?
+A) Metaphysics
+B) Epistemology
+C) Ethics
+D) Logic
+
+In Plato’s Allegory of the Cave, what do the shadows on the wall represent?
+A) The Forms
+B) Illusions or appearances
+C) The truth of reality
+D) Scientific knowledge
+
+According to Frankfurt, a liar:
+A) Says something false without caring if it’s true or false
+B) Says something they believe is false, intending others to believe it true
+C) Always tells the truth but withholds information
+D) Speaks without any communicative purpose
+
+Which of the following is an example of “bullshit” in Frankfurt’s terms?
+A) Saying “It’s raining” when you know it’s sunny
+B) Saying “It’s raining” to distract someone so you can steal their umbrella
+C) Saying “It’s raining” because you misread a weather app
+D) Saying “It’s raining” when you’re unsure but want to fill silence
+
+In radical skepticism, which of the following is doubted?
+A) Sensory reliability
+B) Existence of other minds
+C) Basic logical truths
+D) All of the above
+
+Short Answer (5 pts each)
+
+Name two key differences between epistemology and metaphysics as described in the course text.
+
+In the Allegory of the Cave, why does the freed prisoner have difficulty convincing others of the outside world?
+
+Explain the key difference between lying and bullshit according to Frankfurt.
+
+Describe one practical consequence of living as a radical skeptic.
+
+In a Gettier case, why is justified true belief insufficient for knowledge?
+
+Essay (10 pts each)
+
+Summarize Plato’s Allegory of the Cave and explain its philosophical significance regarding the nature of reality and knowledge.
+
+Construct an original Gettier case, explain how it meets each JTB condition, and why it still fails to constitute knowledge.
+
+Using an example from the text, explain Descartes’ Mind/Body Dualism and the interaction problem.
+
+Describe Frankfurt’s definitions of truth-telling, lying, and bullshit. Provide one original example for each and explain how it fits the definition.
+
+Present one argument against radical skepticism (as in Moore’s proof of the external world) and explain why it is effective.

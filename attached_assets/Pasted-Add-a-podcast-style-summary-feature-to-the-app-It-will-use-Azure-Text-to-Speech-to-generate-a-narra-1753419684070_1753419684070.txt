@@ -1,0 +1,47 @@
+Add a podcast-style summary feature to the app. It will use Azure Text-to-Speech to generate a narrated podcast for any uploaded text.
+
+🎙 Podcast Format (Fixed Structure):
+The output audio should follow this structure:
+
+Brief summary of the text
+
+Discussion of its strengths and weaknesses
+
+Explanation of what the reader might gain from the text, and what they may find difficult
+
+Five representative (and high-quality) quotations from the text, read aloud clearly
+
+🧠 Content Generation:
+Use the selected LLM (e.g., OpenAI, Claude, DeepSeek) to generate the actual podcast 
+script using the format above. Use the first 2,000–5,000 words of the document (or full text if short) as input. 
+Save the final script as plain text.
+
+🔊 Text-to-Speech Rendering:
+Use Microsoft Azure Speech to convert the podcast script into audio.
+
+Use the following environment variables already defined in .env:
+
+AZURE_SPEECH_KEY → Azure API Key for Speech
+
+AZURE_SPEECH_ENDPOINT → Azure Region Endpoint (e.g., https://eastus.tts.speech.microsoft.com/)
+
+Use a natural-sounding voice (e.g., en-US-JennyNeural or en-US-DavisNeural).
+
+Output format should be MP3 or OGG, playable in the browser and downloadable.
+
+🖼 UI Requirements:
+Add a “🎧 Generate Podcast” button next to the document viewer.
+
+When clicked, generate the podcast, then show a play/pause audio interface.
+
+Allow users to download the podcast audio file.
+
+Display a preview of the podcast script under the player.
+
+IMPORTANT: GIVE USERS TWO OPTIONS WHEN IT COMES TO PODCAST GENERATION: OPTION 1: THE USER CAN CHOOSE THE DEFAULT MODE; OPTION 2, THE USER CAN ENTER CUSTOMIZED INSTRUCTIONS (E.G. 
+REWRITE AS A SNARKY DIALOGUE). THE DEFAULT MODE GENERATES A PODCAST THAT COVERS THE AREA HIGHLIGHTED (OR OTHERWISE SELECTED) BY THE USER THAT HAS THE FOLLOWING FORMAT: 
+SUMMARY, ANALYSIS, POSSIBLE OBJECTIONS AND COUNTEROBJECTIONS, STRENGTHS, POSSIBLE CHALLENGES TO READER, AND REPRESENTATIVE QUOTATIONS.
+
+⚠️ Paywall:
+Restrict full podcast generation to registered users with credits. 
+Unregistered users can see the podcast script preview (first 100 words) and hear a 30-second audio snippet only.

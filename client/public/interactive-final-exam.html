@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Philosophy 101 Final Exam - Interactive</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 1000px; margin: 20px auto; padding: 20px; background: #f8f9fa; }
+        .container { background: white; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); padding: 30px; }
+        .header { border-bottom: 2px solid #e9ecef; padding-bottom: 20px; margin-bottom: 30px; }
+        .title { font-size: 24px; font-weight: bold; color: #212529; margin: 0; }
+        .exam-info { margin: 15px 0; padding: 15px; background: #e3f2fd; border-radius: 8px; border-left: 4px solid #2196f3; }
+        .section { margin: 30px 0; padding: 20px; border-radius: 8px; border-left: 4px solid; }
+        .mc-section { background: #e3f2fd; border-left-color: #2196f3; }
+        .sa-section { background: #fff3e0; border-left-color: #ff9800; }
+        .essay-section { background: #f3e5f5; border-left-color: #9c27b0; }
+        .section-title { font-size: 18px; font-weight: bold; margin-bottom: 20px; }
+        .question { margin: 20px 0; padding: 20px; background: white; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+        .question-text { font-weight: 500; margin-bottom: 15px; font-size: 16px; }
+        .choice-container { margin: 10px 0; }
+        .choice { display: flex; align-items: center; padding: 10px; margin: 5px 0; border-radius: 6px; background: #f8f9fa; border: 2px solid #dee2e6; cursor: pointer; transition: all 0.2s; }
+        .choice:hover { background: #e9ecef; border-color: #adb5bd; }
+        .choice.selected { background: #d4edda; border-color: #28a745; }
+        .choice input[type="radio"] { margin-right: 10px; }
+        .answer-input { width: 100%; min-height: 100px; padding: 12px; border: 2px solid #dee2e6; border-radius: 6px; font-family: inherit; font-size: 14px; resize: vertical; }
+        .answer-input:focus { outline: none; border-color: #007bff; }
+        .essay-input { min-height: 200px; }
+        .submit-section { margin-top: 40px; padding: 30px; background: #f8f9fa; border-radius: 8px; text-align: center; }
+        .submit-btn { background: #28a745; color: white; padding: 15px 30px; border: none; border-radius: 8px; font-size: 18px; font-weight: bold; cursor: pointer; transition: all 0.2s; }
+        .submit-btn:hover { background: #1e7e34; transform: translateY(-2px); }
+        .submit-btn:disabled { background: #6c757d; cursor: not-allowed; transform: none; }
+        .loading { display: flex; align-items: center; justify-content: center; padding: 60px; }
+        .spinner { width: 40px; height: 40px; border: 4px solid #f3f4f6; border-top: 4px solid #3b82f6; border-radius: 50%; animation: spin 1s linear infinite; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        .results { margin-top: 30px; padding: 20px; background: #d4edda; border-radius: 8px; border-left: 4px solid #28a745; }
+        .grade-display { font-size: 24px; font-weight: bold; color: #155724; margin-bottom: 15px; }
+        .feedback { margin: 10px 0; padding: 15px; background: white; border-radius: 6px; }
+        .error { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; padding: 15px; border-radius: 6px; margin: 15px 0; }
+        .timer { position: fixed; top: 20px; right: 20px; background: #007bff; color: white; padding: 10px 15px; border-radius: 6px; font-weight: bold; }
+        .progress-bar { width: 100%; height: 8px; background: #e9ecef; border-radius: 4px; margin: 20px 0; }
+        .progress-fill { height: 100%; background: #28a745; border-radius: 4px; transition: width 0.3s; }
+    </style>
+</head>
+<body>
+    <div class="timer" id="timer">Time: 00:00</div>
+    
+    <div class="container">
+        <div class="header">
+            <h1 class="title">Philosophy 101 Final Exam</h1>
+            <div class="exam-info">
+                <strong>Instructions:</strong> Answer all questions completely. You have unlimited time. Click submit when finished for AI grading.
+            </div>
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressFill" style="width: 0%;"></div>
+            </div>
+        </div>
+        
+        <div id="loadingSection" class="loading">
+            <div class="spinner"></div>
+            <span style="margin-left: 15px; font-size: 16px;">Generating your personalized final exam...</span>
+        </div>
+        
+        <div id="errorSection" style="display: none;"></div>
+        
+        <div id="examForm" style="display: none;">
+            <form id="finalExamForm">
+                <div id="multipleChoiceSection" class="section mc-section" style="display: none;">
+                    <div class="section-title">📝 Multiple Choice Questions (2 points each)</div>
+                    <div id="mcQuestions"></div>
+                </div>
+                
+                <div id="shortAnswerSection" class="section sa-section" style="display: none;">
+                    <div class="section-title">✏️ Short Answer Questions (5 points each)</div>
+                    <div id="saQuestions"></div>
+                </div>
+                
+                <div id="essaySection" class="section essay-section" style="display: none;">
+                    <div class="section-title">📚 Essay Questions (15 points each)</div>
+                    <div id="essayQuestions"></div>
+                </div>
+                
+                <div class="submit-section">
+                    <button type="submit" id="submitBtn" class="submit-btn">
+                        Submit Final Exam for Grading
+                    </button>
+                    <div style="margin-top: 15px; color: #6c757d; font-size: 14px;">
+                        Your answers will be graded using AI for immediate feedback
+                    </div>
+                </div>
+            </form>
+        </div>
+        
+        <div id="resultsSection" style="display: none;">
+            <div class="results">
+                <div class="grade-display" id="finalGrade"></div>
+                <div id="detailedFeedback"></div>
+                <div style="margin-top: 30px; text-align: center;">
+                    <button onclick="window.location.href='/'" class="submit-btn" style="background: #007bff;">
+                        Return to Home
+                    </button>
+                    <button onclick="location.reload()" class="submit-btn" style="background: #28a745; margin-left: 15px;">
+                        Take Another Exam
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentExam = null;
+        let startTime = Date.now();
+        let timerInterval;
+        
+        // Start timer
+        function startTimer() {
+            timerInterval = setInterval(() => {
+                const elapsed = Math.floor((Date.now() - startTime) / 1000);
+                const minutes = Math.floor(elapsed / 60);
+                const seconds = elapsed % 60;
+                document.getElementById('timer').textContent = 
+                    `Time: ${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+            }, 1000);
+        }
+        
+        // Update progress based on filled answers
+        function updateProgress() {
+            const totalQuestions = document.querySelectorAll('input[type="radio"], textarea').length;
+            const answeredQuestions = document.querySelectorAll('input[type="radio"]:checked, textarea:not(:placeholder-shown)').length +
+                                   Array.from(document.querySelectorAll('textarea')).filter(ta => ta.value.trim().length > 0).length;
+            
+            const progress = totalQuestions > 0 ? (answeredQuestions / totalQuestions) * 100 : 0;
+            document.getElementById('progressFill').style.width = progress + '%';
+        }
+        
+        async function generateExam() {
+            const loadingSection = document.getElementById('loadingSection');
+            const errorSection = document.getElementById('errorSection');
+            const examForm = document.getElementById('examForm');
+            
+            loadingSection.style.display = 'flex';
+            errorSection.style.display = 'none';
+            examForm.style.display = 'none';
+            
+            try {
+                const response = await fetch('/api/exam/generate', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        aiModel: 'openai',
+                        studyGuideType: 'final'
+                    })
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    currentExam = data;
+                    displayInteractiveExam(data);
+                    startTimer();
+                } else {
+                    throw new Error(`Server returned ${response.status}`);
+                }
+            } catch (error) {
+                console.error('Failed to generate exam:', error);
+                showError(`Failed to generate exam: ${error.message}`);
+            } finally {
+                loadingSection.style.display = 'none';
+            }
+        }
+        
+        function displayInteractiveExam(examData) {
+            const examForm = document.getElementById('examForm');
+            
+            // Display questions
+            displayInteractiveMultipleChoice(examData.mcQuestions || []);
+            displayInteractiveShortAnswer(examData.saQuestions || []);
+            displayInteractiveEssay(examData.essayQuestions || []);
+            
+            examForm.style.display = 'block';
+            
+            // Add event listeners for progress tracking
+            document.addEventListener('change', updateProgress);
+            document.addEventListener('input', updateProgress);
+        }
+        
+        function displayInteractiveMultipleChoice(questions) {
+            const section = document.getElementById('multipleChoiceSection');
+            const container = document.getElementById('mcQuestions');
+            
+            if (questions.length === 0) {
+                section.style.display = 'none';
+                return;
+            }
+            
+            container.innerHTML = questions.map((q, index) => `
+                <div class="question">
+                    <div class="question-text">${index + 1}. ${q.question}</div>
+                    <div class="choice-container">
+                        ${q.choices?.map((choice, i) => `
+                            <label class="choice" onclick="selectChoice(this)">
+                                <input type="radio" name="mc_${q.id}" value="${choice}">
+                                ${String.fromCharCode(65 + i)}. ${choice}
+                            </label>
+                        `).join('') || ''}
+                    </div>
+                </div>
+            `).join('');
+            
+            section.style.display = 'block';
+        }
+        
+        function displayInteractiveShortAnswer(questions) {
+            const section = document.getElementById('shortAnswerSection');
+            const container = document.getElementById('saQuestions');
+            
+            if (questions.length === 0) {
+                section.style.display = 'none';
+                return;
+            }
+            
+            container.innerHTML = questions.map((q, index) => `
+                <div class="question">
+                    <div class="question-text">${index + 1}. ${q.question}</div>
+                    <textarea 
+                        name="sa_${q.id}" 
+                        class="answer-input" 
+                        placeholder="Enter your answer here (2-3 sentences minimum)..."
+                    ></textarea>
+                </div>
+            `).join('');
+            
+            section.style.display = 'block';
+        }
+        
+        function displayInteractiveEssay(questions) {
+            const section = document.getElementById('essaySection');
+            const container = document.getElementById('essayQuestions');
+            
+            if (questions.length === 0) {
+                section.style.display = 'none';
+                return;
+            }
+            
+            container.innerHTML = questions.map((q, index) => `
+                <div class="question">
+                    <div class="question-text">${index + 1}. ${q.question}</div>
+                    <textarea 
+                        name="essay_${q.id}" 
+                        class="answer-input essay-input" 
+                        placeholder="Write a comprehensive essay response (minimum 3 paragraphs)..."
+                    ></textarea>
+                </div>
+            `).join('');
+            
+            section.style.display = 'block';
+        }
+        
+        function selectChoice(label) {
+            // Remove selected class from all choices in this group
+            const question = label.closest('.question');
+            question.querySelectorAll('.choice').forEach(c => c.classList.remove('selected'));
+            
+            // Add selected class to clicked choice
+            label.classList.add('selected');
+            updateProgress();
+        }
+        
+        function showError(message) {
+            const errorSection = document.getElementById('errorSection');
+            errorSection.innerHTML = `<div class="error">${message}</div>`;
+            errorSection.style.display = 'block';
+        }
+        
+        // Handle form submission
+        document.addEventListener('DOMContentLoaded', function() {
+            const form = document.getElementById('finalExamForm');
+            form.addEventListener('submit', async function(e) {
+                e.preventDefault();
+                
+                const submitBtn = document.getElementById('submitBtn');
+                submitBtn.disabled = true;
+                submitBtn.innerHTML = '<div class="spinner" style="width: 20px; height: 20px; margin-right: 10px;"></div>Grading your exam...';
+                
+                // Stop timer
+                clearInterval(timerInterval);
+                
+                // Collect answers
+                const formData = new FormData(form);
+                const answers = {};
+                
+                for (let [key, value] of formData.entries()) {
+                    answers[key] = value;
+                }
+                
+                try {
+                    const response = await fetch('/api/exam/grade', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            examData: currentExam,
+                            studentAnswers: answers,
+                            aiModel: 'openai'
+                        })
+                    });
+                    
+                    if (response.ok) {
+                        const results = await response.json();
+                        displayResults(results);
+                    } else {
+                        throw new Error(`Grading failed: ${response.status}`);
+                    }
+                } catch (error) {
+                    console.error('Grading error:', error);
+                    showError(`Grading failed: ${error.message}`);
+                    submitBtn.disabled = false;
+                    submitBtn.textContent = 'Submit Final Exam for Grading';
+                }
+            });
+        });
+        
+        function displayResults(results) {
+            const examForm = document.getElementById('examForm');
+            const resultsSection = document.getElementById('resultsSection');
+            const finalGrade = document.getElementById('finalGrade');
+            const detailedFeedback = document.getElementById('detailedFeedback');
+            
+            examForm.style.display = 'none';
+            
+            finalGrade.textContent = `Final Grade: ${results.totalScore}/${results.totalPossible} (${results.percentage}%)`;
+            
+            detailedFeedback.innerHTML = `
+                <h3>Detailed Feedback:</h3>
+                ${results.feedback || 'Your exam has been graded successfully.'}
+            `;
+            
+            resultsSection.style.display = 'block';
+            
+            // Scroll to results
+            resultsSection.scrollIntoView({ behavior: 'smooth' });
+        }
+        
+        // Start generating exam immediately when page loads
+        window.onload = function() {
+            generateExam();
+        };
+    </script>
+</body>
+</html>

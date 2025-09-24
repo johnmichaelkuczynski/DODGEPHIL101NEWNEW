@@ -1,0 +1,108 @@
+STOP. The Diagnostics UI is crashing. Fix this now.
+
+Error shown:
+Objects are not valid as a React child (found: object with keys {id, question, type, options, correctAnswer, points, explanation}). If you meant to render a collection of children, use an array instead.
+
+Root cause: You are rendering a whole object in JSX (e.g., {question} or {item.question}) instead of a string like question.stem. Also, the API payload shape is inconsistent (question nested vs. stem at root), and options is an object not mapped to an array before render.
+
+REQUIRED FIXES (do exactly this):
+
+Normalize the payload from /api/diagnostics/new-question before putting it in state. Create a single normal form the UI will use:
+
+ts
+Copy
+Edit
+// Normal form the UI expects:
+{
+  id: string,
+  type: 'mcq' | 'short',
+  stem: string,                 // string to render in JSX
+  options?: Array<{key:'A'|'B'|'C'|'D', text:string}>,  // only for MCQ
+  answerKey?: 'A'|'B'|'C'|'D',  // only for MCQ
+  modelAnswer?: string,         // only for short
+  conceptTags?: string[]
+}
+Implement a normalizer and use it on every fetch result:
+
+ts
+Copy
+Edit
+function normalizeQuestionPayload(p: any) {
+  // Some backends send { question: '...', ... } and some send { stem: '...', ... }
+  const raw = p.question && typeof p.question === 'object' ? p.question : p;
+
+  const stem = (raw.stem ?? raw.text ?? raw.question ?? '').toString();
+
+  let optionsArr;
+  if (raw.options && !Array.isArray(raw.options)) {
+    // Convert {A:'..',B:'..',C:'..',D:'..'} to [{key:'A',text:'..'},...]
+    optionsArr = Object.entries(raw.options).map(([k, v]) => ({ key: k as any, text: String(v) }));
+  } else if (Array.isArray(raw.options)) {
+    optionsArr = raw.options.map((o: any) => ({ key: o.key, text: String(o.text ?? o.label ?? '') }));
+  }
+
+  return {
+    id: String(raw.id ?? crypto.randomUUID()),
+    type: (raw.type === 'mcq' ? 'mcq' : 'short') as 'mcq' | 'short',
+    stem,
+    options: optionsArr,
+    answerKey: raw.answer_key ?? raw.answerKey ?? undefined,
+    modelAnswer: raw.model_answer ?? raw.modelAnswer ?? undefined,
+    conceptTags: raw.concept_tags ?? raw.conceptTags ?? []
+  };
+}
+After calling the endpoint, DO NOT setQuestion(res.data); instead:
+setQuestion(normalizeQuestionPayload(res.data));
+
+Fix JSX renders to use strings/arrays only:
+
+Never render {question}.
+
+Render the stem: {question.stem}.
+
+For MCQ options, map the array:
+
+jsx
+Copy
+Edit
+{question.type === 'mcq' && question.options?.map(opt => (
+  <label key={opt.key}>
+    <input type="radio" name="answer" value={opt.key} />
+    {opt.key}. {opt.text}
+  </label>
+))}
+Ensure the fetch handler doesn’t pass an array where a single question is expected. If the API returns {items:[...]}, take the first item and normalize it. If it returns {question:{...}}, pass data.question into the normalizer.
+
+Guard against null/undefined in the component:
+
+jsx
+Copy
+Edit
+if (!question || !question.stem) return null; // or a skeleton
+MCQ vs SHORT submission:
+
+MCQ: send { type:'mcq', stem, student_answer:selectedKey, answer_key: question.answerKey }.
+
+SHORT: send { type:'short', stem, student_answer:text, model_answer: question.modelAnswer }.
+
+Acceptance checks (must pass):
+
+Navigating to Diagnostics no longer throws the React child error.
+
+question.stem is always a string; options are always rendered via map.
+
+Clicking Next Question yields a new normalized question and never crashes.
+
+Console shows no warnings about rendering objects as children.
+
+Do this now and confirm with a screen recording of Diagnostics generating one MCQ and one SHORT without the overlay error.
+
+
+
+
+
+
+
+
+
+Ask ChatGPT

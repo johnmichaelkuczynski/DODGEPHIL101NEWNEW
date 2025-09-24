@@ -1,0 +1,94 @@
+Understood. To force Replit to render uploaded Word/PDF documents exactly as formatted — including paragraph breaks, bold/italic, font size, alignment, spacing, and inline math — and to chunk them smartly, give this exact message to your Replit agent:
+
+🚨 VERBATIM INSTRUCTIONS FOR REPLIT AGENT: PDF/DOCX FORMATTING + CHUNKING FIX (MANDATORY) 🚨
+
+This app is failing at its core function — displaying uploaded documents exactly as formatted and breaking them into intelligent chunks. This must be fixed IMMEDIATELY. Follow these steps exactly:
+
+✅ 1. DOCX + PDF RENDERING (MUST BE PERFECT)
+Use the mammoth library for .docx and pdfjs-dist for PDFs, but wrap all output in a custom HTML renderer that preserves:
+
+Paragraphs, line breaks
+
+Bold/italic/underline
+
+Font size & alignment (e.g. headings vs. body)
+
+Bullet/numbered lists
+
+Tables (if any)
+
+Superscript/subscript
+
+Inline and block math: use KaTeX or MathJax to render \( \) or $$ $$ markup without fail
+
+➡️ Never display as plaintext
+➡️ Never merge multiple paragraphs into one
+
+Use dangerouslySetInnerHTML to inject the fully parsed HTML exactly as styled
+
+✅ 2. VISUAL MATCHING
+The rendered document should look visually indistinguishable from the source, including:
+
+Paragraph spacing
+
+Font sizing (simulate where needed)
+
+Centered or right-aligned headings
+
+Italic blockquotes
+
+Inline quotes and indentation
+
+Verify this visually against the original, side-by-side, before shipping
+
+✅ 3. CHUNKING (TOKEN-SAFE & HUMAN-SAFE)
+Break the document into meaningful chunks:
+
+Chunk by paragraph and semantic cohesion (e.g., don’t split in middle of argument or example)
+
+Chunks must not exceed 3000 characters or 1000 tokens
+
+Each chunk should show:
+
+A preview
+
+A checkbox for selection
+
+Option to expand before analysis
+
+Create a sidebar navigator if document >10 chunks.
+
+✅ 4. USER INTERACTION
+Once rendered and chunked:
+
+User can select which chunk(s) to analyze by clicking/highlighting
+
+Selected chunks are passed to analysis pipeline
+
+Chat box appears side-by-side with chunked view
+
+Maintain a persistent view of full formatted text on left and interaction on right
+
+✅ 5. MATH & FORMATTING PRESERVATION
+Use katex or mathjax to preserve all:
+
+Inline math: \( x^2 + y^2 = z^2 \)
+
+Display math: $$ \int_a^b f(x) dx $$
+
+Never render these as plaintext. Never escape LaTeX. Render properly on load and in any chunk output.
+
+✅ 6. SUPPORTING ASSETS
+Use:
+
+mammoth for .docx
+
+pdfjs-dist or pdf-parse for PDF extraction
+
+katex/mathjax for math
+
+dangerouslySetInnerHTML to inject styled HTML directly
+
+Add fallback sanitization to avoid XSS while preserving full markup
+
+DO NOT ARGUE. DO NOT DOWNSCOPE. THIS IS A CORE REQUIREMENT FOR THE “LIVING BOOK” APP. FAILURE TO IMPLEMENT THIS CORRECTLY INVALIDATES THE ENTIRE APP.

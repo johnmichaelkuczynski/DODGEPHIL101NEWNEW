@@ -1,0 +1,82 @@
+REPLIT AGENT INSTRUCTIONS
+Project Title: Living Book: Incompleteness of Deductive Logic
+Goal: Turn a fixed academic paper into a fully interactive, AI-augmented interface (not a general-purpose upload app).
+
+🔒 CORE REQUIREMENTS
+This app is for one specific text only. There is no upload feature. Do not allow the user to load their own document.
+
+📘 TEXT DISPLAY
+Preload the academic paper: Incompleteness of Deductive Logic for Publication.pdf (convert to clean HTML on backend or pre-rendered if needed).
+
+Display it as a scrollable, well-formatted document.
+
+Render all math using KaTeX or MathJax.
+
+Create auto-linked headers (like: Abstract, Section 1, 2, etc.) for navigation.
+
+🧠 INSTRUCTION BOX (PASSTHROUGH INTERFACE)
+Add a large instruction box with this placeholder:
+
+“Ask a question, give a command, or modify the content (e.g., ‘rewrite section 3.2 as a dialogue’, ‘summarize the proofs’, or ‘explain it like I’m 15’)”
+
+Upon submission, send:
+
+Full text of the paper (or vector-based document context)
+
+The instruction
+
+To the selected LLM
+
+🔁 LLM MODEL SWITCHER
+Add model selector dropdown:
+
+Default: DeepSeek
+
+Also support: OpenAI, Anthropic, Perplexity
+
+Let the user switch models mid-session.
+
+💬 AI CHAT INTERFACE
+Add chat UI at the bottom.
+
+Must:
+
+Know the paper
+
+Let the user ask anything about it
+
+Let the user issue general queries (e.g., “How does this relate to Gödel’s first theorem?”)
+
+Support Markdown + KaTeX
+
+All messages must be passed without LLM filtering
+
+📤 OUTPUT CONTROLS
+Below each AI response, include buttons:
+
+Download as PDF (with math)
+
+Email this response to me (via SendGrid)
+
+Copy to clipboard
+
+Ensure PDF output preserves layout and renders perfect LaTeX math (no fake Word-style formulas).
+
+⚙️ TECHNICAL DETAILS
+Backend: Flask or Node.js
+
+Math: Use KaTeX or MathJax for browser + PDF export
+
+PDF rendering: Use Puppeteer or similar to preserve KaTeX
+
+Email via SendGrid API (user provides address)
+
+Optional: vector chunking + embedding per section (for better LLM memory)
+
+❌ DO NOT INCLUDE
+File upload field
+
+Dropdowns like “Convert to dialogue” — all instructions must be freeform
+
+Any label that calls this a “philosophy paper”
+
