@@ -22,7 +22,7 @@ function log(message: string, source = "express") {
 
 // Production static file serving
 function serveStatic(app: express.Express) {
-  const distPath = path.resolve(__dirname, "../client/dist");
+  const distPath = path.resolve(__dirname, "../dist/public");
   
   if (!fs.existsSync(distPath)) {
     throw new Error(
@@ -40,17 +40,13 @@ function serveStatic(app: express.Express) {
 
 const app = express();
 
-// Environment checking for production deployment
-const requiredEnvVars = ['DATABASE_URL'];
-const optionalEnvVars = ['OPENAI_API_KEY', 'ANTHROPIC_API_KEY', 'AZURE_SPEECH_KEY', 'AZURE_SPEECH_REGION'];
-const missingEnvVars = requiredEnvVars.filter(envVar => !process.env[envVar]);
+// Environment checking for production deployment  
+const optionalEnvVars = ['DATABASE_URL', 'OPENAI_API_KEY', 'ANTHROPIC_API_KEY', 'AZURE_SPEECH_KEY', 'AZURE_SPEECH_REGION'];
 const missingOptionalVars = optionalEnvVars.filter(envVar => !process.env[envVar]);
 
-if (missingEnvVars.length > 0) {
-  console.error('Missing required environment variables:', missingEnvVars);
-  if (process.env.NODE_ENV === 'production') {
-    process.exit(1);
-  }
+// In production, warn about missing DATABASE_URL but don't exit (use memory storage fallback)
+if (!process.env.DATABASE_URL && process.env.NODE_ENV === 'production') {
+  console.warn('DATABASE_URL not set in production - will use memory storage (data will not persist)');
 }
 
 if (missingOptionalVars.length > 0) {
@@ -62,8 +58,9 @@ if (process.env.NODE_ENV === 'production') {
   console.log('Production environment detected - performing additional checks...');
   
   // Verify build directory exists in production
-  if (!fs.existsSync(path.resolve(__dirname, 'public'))) {
-    console.error('Production build not found. Run "npm run build" before deployment.');
+  const distPath = path.resolve(__dirname, "../dist/public");
+  if (!fs.existsSync(distPath)) {
+    console.error(`Production build not found at ${distPath}. Run "npm run build" before deployment.`);
     process.exit(1);
   }
   
@@ -74,7 +71,14 @@ if (process.env.NODE_ENV === 'production') {
 app.get('/health', async (req: Request, res: Response) => {
   try {
     // Quick health status response
-    const healthStatus = {
+    const healthStatus: {
+      status: string;
+      timestamp: string;
+      environment: string;
+      port: string | number;
+      version: string;
+      database?: string;
+    } = {
       status: 'healthy',
       timestamp: new Date().toISOString(),
       environment: process.env.NODE_ENV || 'development',
