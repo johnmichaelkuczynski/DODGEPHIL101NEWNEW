@@ -211,8 +211,8 @@ const initializeDatabase = async () => {
   });
 
   // Setup development vs production serving
-  if (app.get("env") === "development") {
-    // Dynamically import Vite only in development to avoid bundling it in production
+  if (process.env.NODE_ENV !== 'production') {
+    // Dynamic import Vite only in development - esbuild will tree-shake this in production
     const { setupVite } = await import("./vite.js");
     await setupVite(app, server);
   } else {
