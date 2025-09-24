@@ -9,7 +9,7 @@ import { fileURLToPath } from "url";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// Simple logging function for production
+// Simple logging function
 function log(message: string, source = "express") {
   const formattedTime = new Date().toLocaleTimeString("en-US", {
     hour: "numeric",
@@ -18,6 +18,24 @@ function log(message: string, source = "express") {
     hour12: true,
   });
   console.log(`${formattedTime} [${source}] ${message}`);
+}
+
+// Production static file serving
+function serveStatic(app: express.Express) {
+  const distPath = path.resolve(__dirname, "../client/dist");
+  
+  if (!fs.existsSync(distPath)) {
+    throw new Error(
+      `Could not find the build directory: ${distPath}, make sure to build the client first`,
+    );
+  }
+
+  app.use(express.static(distPath));
+  
+  // Fall through to index.html if the file doesn't exist (SPA routing)
+  app.use("*", (_req, res) => {
+    res.sendFile(path.resolve(distPath, "index.html"));
+  });
 }
 
 const app = express();
@@ -192,21 +210,13 @@ const initializeDatabase = async () => {
     }
   });
 
-  // Serve static files for both development and production
-  const distPath = path.resolve(__dirname, "../client/dist");
-  
-  if (fs.existsSync(distPath)) {
-    app.use(express.static(distPath));
-    // Fall through to index.html if the file doesn't exist (SPA routing)
-    app.use("*", (_req, res) => {
-      res.sendFile(path.resolve(distPath, "index.html"));
-    });
+  // Setup development vs production serving
+  if (app.get("env") === "development") {
+    // Dynamically import Vite only in development to avoid bundling it in production
+    const { setupVite } = await import("./vite.js");
+    await setupVite(app, server);
   } else {
-    console.warn(`Static files directory not found: ${distPath}`);
-    // Fallback for missing build
-    app.use("*", (_req, res) => {
-      res.status(404).json({ error: "Application not built. Run 'npm run build' first." });
-    });
+    serveStatic(app);
   }
 
   // Configure port for both development and production
