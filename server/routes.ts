@@ -3355,11 +3355,12 @@ Generate exactly:
 CRITICAL: Every MC question MUST have "choices" array and "correctAnswer" field!
 FOCUS ONLY ON THE USER'S ACTUAL COURSE CONTENT: Three branches of philosophy (epistemology/metaphysics/ethics), Plato's Allegory of the Cave (prisoners/shadows/fire/escape), Frankfurt's three speech types (truth-telling/lying/bullshit), Radical skepticism and practical problems.`;
 
-      // Set shorter timeout for exam generation to prevent hanging
+      // Set timeout for exam generation - longer for final exams
+      const timeoutMs = studyGuideType === 'final' ? 90000 : 45000; // 90 seconds for finals, 45 for others
       const response = await Promise.race([
         generateAIResponse(aiModel as AIModel, prompt, ""),
         new Promise((_, reject) => 
-          setTimeout(() => reject(new Error('Generation timeout after 45 seconds')), 45000)
+          setTimeout(() => reject(new Error(`Generation timeout after ${timeoutMs / 1000} seconds`)), timeoutMs)
         )
       ]) as string;
       
