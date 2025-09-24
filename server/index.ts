@@ -1,7 +1,6 @@
 import express, { type Request, Response, NextFunction } from "express";
 import cookieParser from "cookie-parser";
 import { registerRoutes } from "./routes";
-import { setupVite, serveStatic, log } from "./vite";
 import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
@@ -9,6 +8,17 @@ import { fileURLToPath } from "url";
 // ES module compatibility
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
+
+// Simple logging function for production
+function log(message: string, source = "express") {
+  const formattedTime = new Date().toLocaleTimeString("en-US", {
+    hour: "numeric",
+    minute: "2-digit",
+    second: "2-digit",
+    hour12: true,
+  });
+  console.log(`${formattedTime} [${source}] ${message}`);
+}
 
 const app = express();
 
@@ -182,13 +192,21 @@ const initializeDatabase = async () => {
     }
   });
 
-  // importantly only setup vite in development and after
-  // setting up all the other routes so the catch-all route
-  // doesn't interfere with the other routes
-  if (app.get("env") === "development") {
-    await setupVite(app, server);
+  // Serve static files for both development and production
+  const distPath = path.resolve(__dirname, "../client/dist");
+  
+  if (fs.existsSync(distPath)) {
+    app.use(express.static(distPath));
+    // Fall through to index.html if the file doesn't exist (SPA routing)
+    app.use("*", (_req, res) => {
+      res.sendFile(path.resolve(distPath, "index.html"));
+    });
   } else {
-    serveStatic(app);
+    console.warn(`Static files directory not found: ${distPath}`);
+    // Fallback for missing build
+    app.use("*", (_req, res) => {
+      res.status(404).json({ error: "Application not built. Run 'npm run build' first." });
+    });
   }
 
   // Configure port for both development and production
