@@ -7,7 +7,6 @@ import { AuthProvider } from "@/hooks/use-auth";
 import CourseApp from "@/pages/course-app";
 import FinalExamPage from "@/pages/final-exam";
 import NotFound from "@/pages/not-found";
-import { ExamPage } from "../../src/features/exams/ExamPage";
 
 function Router() {
   return (
@@ -17,7 +16,6 @@ function Router() {
       <Route path="/course/:tab" component={CourseApp} />
       <Route path="/diagnostics" component={() => <CourseApp defaultTab="diagnostics" />} />
       <Route path="/final-exam" component={FinalExamPage} />
-      <Route path="/exams/:id" component={ExamPage} />
 
       <Route component={NotFound} />
     </Switch>

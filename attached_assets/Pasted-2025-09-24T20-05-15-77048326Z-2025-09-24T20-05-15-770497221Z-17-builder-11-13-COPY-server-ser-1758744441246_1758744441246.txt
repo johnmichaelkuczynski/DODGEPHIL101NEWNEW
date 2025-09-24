@@ -1,0 +1,50 @@
+2025-09-24T20:05:15.77048326Z 
+2025-09-24T20:05:15.770497221Z #17 [builder 11/13] COPY server/ ./server/
+2025-09-24T20:05:15.770500381Z #17 DONE 0.0s
+2025-09-24T20:05:15.77050325Z 
+2025-09-24T20:05:15.770506191Z #18 [builder 12/13] COPY shared/ ./shared/
+2025-09-24T20:05:15.770509011Z #18 DONE 0.0s
+2025-09-24T20:05:15.770511711Z 
+2025-09-24T20:05:15.770514641Z #19 [builder 13/13] RUN npm run build
+2025-09-24T20:05:15.908048494Z #19 0.212 
+2025-09-24T20:05:15.908062334Z #19 0.212 > rest-express@1.0.0 build
+2025-09-24T20:05:15.908066124Z #19 0.212 > vite build && esbuild server/index.ts --platform=node --packages=external --bundle --format=esm --outdir=dist
+2025-09-24T20:05:15.908069164Z #19 0.212 
+2025-09-24T20:05:16.160791705Z #19 0.464 vite v5.4.19 building for production...
+2025-09-24T20:05:16.311436255Z #19 0.523 transforming...
+2025-09-24T20:05:16.612095862Z #19 0.819 Browserslist: browsers data (caniuse-lite) is 11 months old. Please run:
+2025-09-24T20:05:16.612118213Z #19 0.819   npx update-browserslist-db@latest
+2025-09-24T20:05:16.612122073Z #19 0.819   Why you should do it regularly: https://github.com/browserslist/update-db#readme
+2025-09-24T20:05:18.115978672Z #19 2.269 ✓ 7 modules transformed.
+2025-09-24T20:05:18.115998132Z #19 2.271 x Build failed in 1.78s
+2025-09-24T20:05:18.116002292Z #19 2.272 error during build:
+2025-09-24T20:05:18.116005812Z #19 2.272 Could not resolve "../../src/features/exams/ExamPage" from "client/src/App.tsx"
+2025-09-24T20:05:18.116016443Z #19 2.272 file: /app/client/src/App.tsx
+2025-09-24T20:05:18.116019143Z #19 2.272     at getRollupError (file:///app/node_modules/rollup/dist/es/shared/parseAst.js:396:41)
+2025-09-24T20:05:18.116020853Z #19 2.272     at error (file:///app/node_modules/rollup/dist/es/shared/parseAst.js:392:42)
+2025-09-24T20:05:18.116023033Z #19 2.272     at ModuleLoader.handleInvalidResolvedId (file:///app/node_modules/rollup/dist/es/shared/node-entry.js:20065:24)
+2025-09-24T20:05:18.116024943Z #19 2.272     at file:///app/node_modules/rollup/dist/es/shared/node-entry.js:20025:26
+2025-09-24T20:05:19.278352291Z #19 ERROR: process "/bin/sh -c npm run build" did not complete successfully: exit code: 1
+2025-09-24T20:05:19.278377192Z ------
+2025-09-24T20:05:19.278384692Z  > [builder 13/13] RUN npm run build:
+2025-09-24T20:05:19.278417112Z 0.819   Why you should do it regularly: https://github.com/browserslist/update-db#readme
+2025-09-24T20:05:19.278422742Z 2.269 ✓ 7 modules transformed.
+2025-09-24T20:05:19.278426893Z 2.271 x Build failed in 1.78s
+2025-09-24T20:05:19.278431473Z 2.272 error during build:
+2025-09-24T20:05:19.278435563Z 2.272 Could not resolve "../../src/features/exams/ExamPage" from "client/src/App.tsx"
+2025-09-24T20:05:19.278439973Z 2.272 file: /app/client/src/App.tsx
+2025-09-24T20:05:19.278444133Z 2.272     at getRollupError (file:///app/node_modules/rollup/dist/es/shared/parseAst.js:396:41)
+2025-09-24T20:05:19.278448013Z 2.272     at error (file:///app/node_modules/rollup/dist/es/shared/parseAst.js:392:42)
+2025-09-24T20:05:19.278452383Z 2.272     at ModuleLoader.handleInvalidResolvedId (file:///app/node_modules/rollup/dist/es/shared/node-entry.js:20065:24)
+2025-09-24T20:05:19.278456363Z 2.272     at file:///app/node_modules/rollup/dist/es/shared/node-entry.js:20025:26
+2025-09-24T20:05:19.278460273Z ------
+2025-09-24T20:05:19.280689729Z Dockerfile:23
+2025-09-24T20:05:19.280704769Z --------------------
+2025-09-24T20:05:19.280709839Z   21 |     
+2025-09-24T20:05:19.280714509Z   22 |     # Build the application
+2025-09-24T20:05:19.280719589Z   23 | >>> RUN npm run build
+2025-09-24T20:05:19.2807237Z   24 |     
+2025-09-24T20:05:19.2807277Z   25 |     # Production stage
+2025-09-24T20:05:19.28073182Z --------------------
+2025-09-24T20:05:19.28073651Z error: failed to solve: process "/bin/sh -c npm run build" did not complete successfully: exit code: 1
+2025-09-24T20:05:19.297494601Z error: exit status 1
