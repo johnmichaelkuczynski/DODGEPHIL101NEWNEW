@@ -11,13 +11,24 @@ import NotFound from "@/pages/not-found";
 function Router() {
   return (
     <Switch>
-      <Route path="/" component={CourseApp} />
-      <Route path="/course" component={CourseApp} />
-      <Route path="/course/:tab" component={CourseApp} />
-      <Route path="/diagnostics" component={() => <CourseApp defaultTab="diagnostics" />} />
-      <Route path="/final-exam" component={FinalExamPage} />
-
-      <Route component={NotFound} />
+      <Route path="/">
+        <CourseApp />
+      </Route>
+      <Route path="/course">
+        <CourseApp />
+      </Route>
+      <Route path="/course/:tab">
+        {(params) => <CourseApp defaultTab={params.tab} />}
+      </Route>
+      <Route path="/diagnostics">
+        <CourseApp defaultTab="diagnostics" />
+      </Route>
+      <Route path="/final-exam">
+        <FinalExamPage />
+      </Route>
+      <Route>
+        <NotFound />
+      </Route>
     </Switch>
   );
 }
